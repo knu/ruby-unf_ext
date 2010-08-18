@@ -134,19 +134,16 @@ namespace UNF {
 	unsigned last_matched_index = 0;
 	
 	unsigned retry_root_node = 0;
-	unsigned char retry_root_class = 0xFF;
+	unsigned char retry_root_class = 0;
 
 	for(bool first=true;;) {
 	  if(Util::is_utf8_char_start_byte(in.peek())) {
 	    if(node_index != 0)
 	      first=false;
 	    current_char_head = in.cur();
-	    
+
 	    retry_root_node = node_index;
-	    if(retry_root_class==0 && in.get_canonical_class()==0) 
-	      retry_root_class = 0xFF;
-	    else
-	      retry_root_class = in.get_canonical_class();
+	    retry_root_class = in.get_canonical_class();
 	  }
 
 	retry:
@@ -159,7 +156,7 @@ namespace UNF {
 	      last_matched_index  = terminal_index;
 	      last_skip_tail_offset = in.skipped.size();
 	      last_matched_tail = in.cur();
-	      if(in.eos())
+	      if(in.eos() || retry_root_class > in.get_canonical_class())
 		break;
 	    }
 	  } else if (first==true) {
