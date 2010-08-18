@@ -17,18 +17,18 @@ namespace UNF {
       : nf_d(TABLE::CANONICAL_DECOM_NODES, TABLE::VALUE),
 	nf_kd(TABLE::COMPATIBILITY_DECOM_NODES, TABLE::VALUE),
 	nf_c(TABLE::CANONICAL_COM_NODES, TABLE::VALUE),
-	ccc(TABLE::CANONICAL_CLASS_NODES),
-	nf_qc_c(TABLE::NFC_ILLEGAL_NODES),
-	nf_qc_kc(TABLE::NFKC_ILLEGAL_NODES)
+	nf_c_qc(TABLE::NFC_ILLEGAL_NODES),
+	nf_kc_qc(TABLE::NFKC_ILLEGAL_NODES),
+	ccc(TABLE::CANONICAL_CLASS_NODES)
     {}
 
     const char* nfd(const char* src) { return decompose(src, nf_d); }
     const char* nfkd(const char* src) { return decompose(src, nf_kd); }
-    const char* nfc(const char* src) { return compose(src, nf_qc_c, nf_d); }
-    const char* nfkc(const char* src) { return compose(src, nf_qc_kc, nf_kd); }
+    const char* nfc(const char* src) { return compose(src, nf_c_qc, nf_d); }
+    const char* nfkc(const char* src) { return compose(src, nf_kc_qc, nf_kd); }
 
   private:
-    const char* decompose(const char* src, const Trie::Searcher& nf) {
+    const char* decompose(const char* src, const Trie::NormalizationForm& nf) {
       const char* beg = next_invalid_char(src, nf, true);
       if(*beg=='\0')
 	return src;
@@ -44,13 +44,14 @@ namespace UNF {
       return buffer.c_str();      
     }
 
-    void decompose_one(const char* beg, const char* end, const Trie::Searcher& nf, std::string& buf) {
+    void decompose_one(const char* beg, const char* end, const Trie::NormalizationForm& nf, std::string& buf) {
       unsigned last = buf.size();
-      nf.decompose_one(Trie::RangeCharStream(beg,end), buf);
-      canonical_combining_class_ordering(buf.data()+last, buf.data()+buf.size());
+      nf.decompose(Trie::RangeCharStream(beg,end), buf);
+      char* bufbeg = const_cast<char*>(buf.data());
+      canonical_combining_class_ordering(bufbeg+last, bufbeg+buf.size());
     }
 
-    const char* compose(const char* src, const Trie::Searcher& nf, const Trie::Searcher& nf_decomp) {
+    const char* compose(const char* src, const Trie::NormalizationForm& nf, const Trie::NormalizationForm& nf_decomp) {
       const char* beg = next_invalid_char(src, nf);
       if(*beg=='\0')
 	return src;
@@ -69,24 +70,24 @@ namespace UNF {
     }
 
     const char* compose_one(const char* starter, const char* rest_starter, std::string& buf) {
-      Trie::CharStreamForComposition in(starter, rest_starter, classes, buffer3);
+      Trie::CharStreamForComposition in(starter, rest_starter, canonical_classes, buffer3);
       while(in.eos1()==false) // XXX: name, in.eos1()
-	nf_c.longest_common_prefixA_one(in, buf);
+	nf_c.compose(in, buf);
       return rest_starter + in.over();
     }
 
-    void canonical_combining_class_ordering(const char* beg, const char* end) {
-      classes.assign(end-beg+1, 0);    // +1 is for sentinel value
-      ccc.classify2(beg, classes);
+    void canonical_combining_class_ordering(char* beg, const char* end) {
+      canonical_classes.assign(end-beg+1, 0); // +1 is for sentinel value
+      ccc.sort(beg, canonical_classes);
     }
 
-    const char* next_invalid_char(const char* src, const Trie::Searcher& nf, bool decomp_phase=false) {
+    const char* next_invalid_char(const char* src, const Trie::NormalizationForm& nf, bool decomp_phase=false) {
       int last_canonical_class = 0;
       const char* cur = Util::nearest_utf8_char_start_point(src);
       const char* starter = cur;
       
       for(; *cur != '\0'; cur = Util::nearest_utf8_char_start_point(cur+1)) {
-	int canonical_class = ccc.get_canonical_class(cur);
+	int canonical_class = ccc.get_class(cur);
 	if(last_canonical_class > canonical_class && canonical_class != 0)
 	  return starter;
 
@@ -108,23 +109,23 @@ namespace UNF {
 
     const char* next_starter(const char* src) const {
       const char* cur = Util::nearest_utf8_char_start_point(src+1);
-      while(ccc.get_canonical_class(cur)!=0)
+      while(ccc.get_class(cur)!=0)
 	cur = Util::nearest_utf8_char_start_point(cur+1);
       return cur;
     }
 
   private:
-    const Trie::Searcher nf_d;
-    const Trie::Searcher nf_kd;
-    const Trie::Searcher nf_c;
-    const Trie::Searcher ccc;
-    const Trie::Searcher nf_qc_c;
-    const Trie::Searcher nf_qc_kc;
+    const Trie::NormalizationForm nf_d;
+    const Trie::NormalizationForm nf_kd;
+    const Trie::NormalizationForm nf_c;
+    const Trie::NormalizationForm nf_c_qc;
+    const Trie::NormalizationForm nf_kc_qc;
+    const Trie::CanonicalCombiningClass ccc;
     
     std::string buffer;
     std::string buffer2;
     std::string buffer3;
-    std::vector<unsigned char> classes;
+    std::vector<unsigned char> canonical_classes;
   };
 }
 
