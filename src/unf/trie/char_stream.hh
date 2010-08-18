@@ -110,6 +110,9 @@ namespace UNF {
 	
 	unsigned char mid_class = get_prev_canonical_class();
 	unsigned char cur_class = get_canonical_class();
+	
+	if(prev_class==0 && mid_class==0 && cur_class!=0)
+	  return false;
 
 	if(prev_class < cur_class && mid_class < cur_class) {
 	  skipped.append(ppp, cur());
