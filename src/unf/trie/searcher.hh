@@ -12,14 +12,14 @@ namespace UNF {
       Searcher(const Node* nodes, const char* value=NULL)
 	: nodes(nodes), value(value) {}
 
-      int find_value(const char* key, int default_value) const {
+      unsigned find_value(const char* key, int default_value) const {
 	unsigned node_index=0;
 	for(CharStream in(key);; in.read()) {
 	  node_index = nodes[node_index].jump(in.peek());
 	  if(nodes[node_index].check_char()==in.peek()) {
 	    unsigned terminal_index = nodes[node_index].jump('\0');
 	    if(nodes[terminal_index].check_char()=='\0')
-	      return static_cast<int>(nodes[terminal_index].value());
+	      return nodes[terminal_index].value();
 	  } else
 	    return default_value;
 	}
@@ -35,7 +35,7 @@ namespace UNF {
       CanonicalCombiningClass(const unsigned* node_uints)
 	: Searcher(Node::from_uint_array(node_uints)) {}
       
-      int get_class(const char* str) const { return find_value(str,0); }
+      unsigned get_class(const char* str) const { return find_value(str,0); }
 
       void sort(char* str, std::vector<unsigned char>& classes) const {
 	CharStream in(str);
@@ -96,8 +96,7 @@ namespace UNF {
       NormalizationForm(const unsigned* node_uints, const char* value=NULL)
 	: Searcher(Node::from_uint_array(node_uints), value) {} 
 
-      // TODO: comment
-      int quick_check(const char* key) const { return find_value(key,-1); }
+      bool quick_check(const char* key) const { return find_value(key,0xFFFFFFFF)==0xFFFFFFFF; }
 
       void decompose(RangeCharStream in, std::string& buffer) const {
       loop_head:
