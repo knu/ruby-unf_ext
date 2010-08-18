@@ -18,6 +18,9 @@ namespace UNF {
       unsigned check_char() const { return data>>24; }
       unsigned to_uint() const { return data; }
 
+      static const Node* from_uint_array(const unsigned* node_uints)
+      { return reinterpret_cast<const Node*>(node_uints); }
+
     private:
       unsigned base() const { return data & 0xFFFFFF; }
 

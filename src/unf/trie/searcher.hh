@@ -4,28 +4,14 @@
 #include "char_stream.hh"
 #include "node.hh"
 #include "../util.hh"
-#include <fstream>
 
 namespace UNF {
   namespace Trie {
-    // NFの方が適切?
     class Searcher {
     public:
-      Searcher(const unsigned* nodes, const char* value=NULL)
-	: nodes(reinterpret_cast<const Node*>(nodes)), value(value) {
-      }
+      Searcher(const Node* nodes, const char* value=NULL)
+	: nodes(nodes), value(value) {}
 
-      // check whether the byte-sequence(code-point) can occur in this Normalization Form
-      // return: 
-      //   -1=yes, 0=no, 1=maybe # http://www.unicode.org/reports/tr44/#Decompositions_and_Normalization
-      int quick_check(const char* key) const {
-	return find_value(key,-1);
-      }
-
-      int get_canonical_class(const char* key) const {
-	return find_value(key,0);
-      }
-      
       int find_value(const char* key, int default_value) const {
 	unsigned node_index=0;
 	for(CharStream in(key);; in.read()) {
@@ -37,94 +23,108 @@ namespace UNF {
 	  } else
 	    return default_value;
 	}
-      }
+      }     
 
-      void decompose_one(RangeCharStream in, std::string& buffer) const {
+    protected:
+      const Node* nodes;
+      const char* value;
+    }; 
+    
+    class CanonicalCombiningClass : private Searcher {
+    public:
+      CanonicalCombiningClass(const unsigned* node_uints)
+	: Searcher(Node::from_uint_array(node_uints)) {}
+      
+      int get_class(const char* str) const { return find_value(str,0); }
+
+      void sort(char* str, std::vector<unsigned char>& classes) const {
+	CharStream in(str);
+	unsigned sort_beg=0;
+	unsigned sort_end=0;
+	unsigned unicode_char_count=0;
+
       loop_head:
-	const char* beg = in.cur();
-	unsigned node_index=0;
-
-	for(;;) {
-	  unsigned terminal_index = nodes[node_index].jump('\0');
-	  if(nodes[terminal_index].check_char()=='\0') {
-	    buffer.append(value+nodes[terminal_index].value());
-	    beg = in.cur();
+	unsigned beg = in.cur()-str;
+	
+	for(unsigned node_index=0;;){
+	  node_index = nodes[node_index].jump(in.read());
+	  
+	  if(nodes[node_index].check_char()==in.prev()) {
+	    unsigned terminal_index = nodes[node_index].jump('\0');
+	    if(nodes[terminal_index].check_char()=='\0') {
+	      if((unicode_char_count++)==0)
+		sort_beg = beg;
+	      sort_end = in.cur()-str;
+	      
+	      unsigned char klass = nodes[terminal_index].value();
+	      for(unsigned i=beg; i < sort_end; i++) 
+		classes[i] = klass;
+ 	      break;
+	    }
+	  } else {
+	    if(unicode_char_count > 1)
+	      bubble_sort(str, classes, sort_beg, sort_end);
+	    unicode_char_count = 0;
 	    break;
 	  }
-	  
-	  unsigned next_index = nodes[node_index].jump(in.read());
-	  if(nodes[next_index].check_char()==in.prev())
-	    node_index = next_index;
-	  else {
-	    while(is_utf8_char_start_byte(in.peek())==false)
-	      in.read();
+	} 
+	Util::eat_until_utf8_char_start_point(in);
+
+	if(in.eos()==false)
+	  goto loop_head;
+
+	if(unicode_char_count > 1)
+	  bubble_sort(str, classes, sort_beg, sort_end);
+      }      
+
+    private:
+      void bubble_sort(char* str, std::vector<unsigned char>& canonical_classes, unsigned beg, unsigned end) const {
+	for(unsigned limit=beg, next=end; limit != next;) {
+	  limit = next;
+	  for(unsigned i=beg+1; i < limit; i++)
+	    if(canonical_classes[i-1] > canonical_classes[i]) {
+	      std::swap(canonical_classes[i-1], canonical_classes[i]);
+	      std::swap(str[i-1], str[i]);
+	      next = i;
+	    }
+	}
+      }
+    };
+
+    class NormalizationForm : private Searcher {
+    public:
+      NormalizationForm(const unsigned* node_uints, const char* value=NULL)
+	: Searcher(Node::from_uint_array(node_uints), value) {} 
+
+      // TODO: comment
+      int quick_check(const char* key) const { return find_value(key,-1); }
+
+      void decompose(RangeCharStream in, std::string& buffer) const {
+      loop_head:
+	const char* beg = in.cur();
+
+	for(unsigned node_index=0;;) {
+	  node_index = nodes[node_index].jump(in.read());
+	  if(nodes[node_index].check_char()==in.prev()) {
+	    unsigned terminal_index = nodes[node_index].jump('\0');
+	    if(nodes[terminal_index].check_char()=='\0') {
+	      buffer.append(value+nodes[terminal_index].value());
+	      beg = in.cur();
+	      break;
+	    }
+	  } else {
+	    Util::eat_until_utf8_char_start_point(in);
+	    buffer.append(beg, in.cur());
 	    break;
 	  }
 	}  
-	buffer.append(beg, in.cur());
 
 	if(in.eos()==false)
 	  goto loop_head;
       }
 
-      void classify2(const char* key, std::vector<unsigned char>& classes) const {
-	CharStream in(key);
-	unsigned starter=0;
-	unsigned ender=0;
-	unsigned char_count=0;
-
-      loop_head:
-	unsigned beg = in.cur()-key;
-	unsigned node_index=0;
-	for(;;){
-	  unsigned next_index = nodes[node_index].jump(in.read());
-	  
-	  if(nodes[next_index].check_char()==in.prev()) {
-	    node_index = next_index;
-
-	    unsigned terminal_index = nodes[node_index].jump('\0');
-	    if(nodes[terminal_index].check_char()=='\0') {
-	      if(char_count==0)
-		starter = beg;
-	      char_count++;
-	      unsigned char klass = nodes[terminal_index].value();
-	      ender = in.cur()-key;
-	      for(unsigned i=beg; i < ender; i++) 
-		classes[i] = klass;
- 	      break;
-	    }
-	    if(in.prev()=='\0') return;
-	  } else {
-	    if(char_count > 1)
-	      bubble_sort(classes, (char*)key, starter, ender);
-	    char_count = 0;
-	    break;
-	  }
-	} 
-
-	for(; is_utf8_char_start_byte(in.peek())==false; in.read());
-
-	if(in.peek() != '\0')
-	  goto loop_head;
-
-	if(char_count > 1)
-	  bubble_sort(classes, (char*)key, starter, ender);
-      }
-
-      static void bubble_sort(std::vector<unsigned char>& classes, char* str, unsigned beg, unsigned end) {
-	for(unsigned limit=beg, next=end; limit != next;) {
-	  limit = next;
-	  for(unsigned i=beg+1; i < limit; i++)
-	    if(classes[i-1] > classes[i]) {
-	      std::swap(classes[i-1], classes[i]);
-	      std::swap(str[i-1],     str[i]);
-	      next = i;
-	    }
-	}
-      }
-
       template<class BacktrackableCharStream>
-      void longest_common_prefixA_one(BacktrackableCharStream& in, std::string& buf) const {
+      void compose(BacktrackableCharStream& in, std::string& buf) const {
 	const char* beg = in.cur();
 
 	unsigned rest = 0;
@@ -148,7 +148,7 @@ namespace UNF {
 	      break;
 	  }
 
-	  if(is_utf8_char_start_byte(in.peek())==true) {
+	  if(Util::is_utf8_char_start_byte(in.peek())==true) {
 	    if(node_index != 0)
 	      first=false;
 	    
@@ -180,25 +180,12 @@ namespace UNF {
 	  in.setCur(tail);
 	} else {
 	  in.setCur(beg+1);
-	  while(is_utf8_char_start_byte(in.peek())==false)
-	    in.read();
-	  //buf.append(beg, in.getCur());
-	  in.append(buf, beg, in.cur());
+	  Util::eat_until_utf8_char_start_point(in);
+	  in.append(buf, beg, in.cur()); // XXX: name
 	}
       }
-      
-      static bool is_utf8_char_start_byte(char byte) {
-	if(!(byte&0x80))
-	  return true; // ascii
-	else if (byte&0x40)
-	  return true; // start of a UTF-8 character byte sequence
-	return false;
-      }
-
-    private:
-      const Node* nodes;
-      const char* value;
     };
   }
 }
+
 #endif
