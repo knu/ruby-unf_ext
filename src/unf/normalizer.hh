@@ -58,7 +58,7 @@ namespace UNF {
       
       buffer.assign(src, beg);
       while(*beg!='\0') {
-	const char* end = next_starter(beg);
+	const char* end = next_valid_starter(beg, nf);
 	buffer2.clear();
 	decompose_one(beg, end, nf_decomp, buffer2);
 	end = compose_one(buffer2.c_str(), end, buffer);
@@ -91,13 +91,8 @@ namespace UNF {
 	if(last_canonical_class > canonical_class && canonical_class != 0)
 	  return starter;
 
-	int ret = nf.quick_check(cur);
-	if(ret!=-1) {
-	  if(decomp_phase || ret==0)
-	    if(canonical_class==0)
-	      starter = cur;
+	if(nf.quick_check(cur)==false)
 	  return starter;
-	}
 
 	if(canonical_class==0)
 	  starter=cur;
@@ -110,6 +105,13 @@ namespace UNF {
     const char* next_starter(const char* src) const {
       const char* cur = Util::nearest_utf8_char_start_point(src+1);
       while(ccc.get_class(cur)!=0)
+	cur = Util::nearest_utf8_char_start_point(cur+1);
+      return cur;
+    }
+
+    const char* next_valid_starter(const char* src, const Trie::NormalizationForm& nf) const {
+      const char* cur = Util::nearest_utf8_char_start_point(src+1);
+      while(ccc.get_class(cur)!=0 || nf.quick_check(cur)==false)
 	cur = Util::nearest_utf8_char_start_point(cur+1);
       return cur;
     }

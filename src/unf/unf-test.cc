@@ -92,13 +92,6 @@ int main(int argc, char** argv) {
 	std::cerr << "Failed(" << cnt << "): NFKC" << std::endl;
 	for(unsigned i=0; i < ary.size(); i++) {
 	  std::cerr << " " << ary[i] << "\t -> " << norm.nfkc(ary[i].c_str());
-	  std::cerr << " # ";
-	  for(unsigned j=0; j < ary[i].size(); j++) 
-	    std::cerr << (int)ary[i][j] << " ";
-	  std::cerr << " -> ";
-	  const char* s=norm.nfkc(ary[i].c_str());
-	  for(; *s != '\0'; s++)
-	    std::cerr << (int)*s << " ";
 	  std::cerr << std::endl;
 	}
 	return 1;
