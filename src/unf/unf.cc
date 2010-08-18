@@ -8,14 +8,14 @@ bool eq(const char* s1, const char* s2) { return strcmp(s1, s2)==0; }
 int main(int argc, char** argv) {
   if(argc != 2) {
   usage:
-    std::cerr << "Usage: unf <d|c|kd|kc>" << std::endl;
+    std::cerr << "Usage: unf <D|C|KD|KC>" << std::endl;
     return 1;
   }
   
   UNF::Normalizer norm;
 
   const char* fs = argv[1];
-  int form = eq(fs,"d") ? 0 : eq(fs,"c") ? 1 : eq(fs,"kd") ? 2 : eq(fs,"kc") ? 3 : 4;
+  int form = eq(fs,"D") ? 0 : eq(fs,"C") ? 1 : eq(fs,"KD") ? 2 : eq(fs,"KC") ? 3 : 4;
   if(form==4)
     goto usage;
 

@@ -123,64 +123,67 @@ namespace UNF {
 	  goto loop_head;
       }
 
-      template<class BacktrackableCharStream>
-      void compose(BacktrackableCharStream& in, std::string& buf) const {
-	const char* beg = in.cur();
-
-	unsigned rest = 0;
+      void compose(CharStreamForComposition& in, std::string& buf) const {
 	in.skipped.clear();
 
-	unsigned last_matched_index=0;
-	const char* tail=NULL;
-	unsigned node_index=0;
-	unsigned prev_node = 0;
-	unsigned char prev_class = 0xFF;
+	const char* const beg = in.cur();
+	const char* current_char_head = in.cur();
+	const char* last_matched_tail = NULL;
 	
-	const char* ppp=in.cur();
+	unsigned node_index = 0;
+	unsigned last_skip_tail_offset = 0;
+	unsigned last_matched_index = 0;
+	
+	unsigned retry_root_node = 0;
+	unsigned char retry_root_class = 0xFF;
 
 	for(bool first=true;;) {
-	  unsigned terminal_index = nodes[node_index].jump('\0');
-	  if(nodes[terminal_index].check_char()=='\0') {
-	    last_matched_index  = terminal_index;
-	    rest = in.skipped.size();
-	    tail = in.cur();
-	    if(in.peek()=='\0')
-	      break;
-	  }
-
-	  if(Util::is_utf8_char_start_byte(in.peek())==true) {
+	  if(Util::is_utf8_char_start_byte(in.peek())) {
 	    if(node_index != 0)
 	      first=false;
+	    current_char_head = in.cur();
 	    
-	    ppp = in.cur();
-	    prev_node = node_index;
-	    if(prev_class==0 && in.get_class()==0) 
-	      prev_class = 0xFF;
+	    retry_root_node = node_index;
+	    if(retry_root_class==0 && in.get_canonical_class()==0) 
+	      retry_root_class = 0xFF;
 	    else
-	      prev_class = in.get_class();
+	      retry_root_class = in.get_canonical_class();
 	  }
 
 	retry:
 	  unsigned next_index = nodes[node_index].jump(in.read());
 	  if(nodes[next_index].check_char()==in.prev()) {
+	    // succeeded
 	    node_index = next_index;
+	    unsigned terminal_index = nodes[node_index].jump('\0');
+	    if(nodes[terminal_index].check_char()=='\0') {
+	      last_matched_index  = terminal_index;
+	      last_skip_tail_offset = in.skipped.size();
+	      last_matched_tail = in.cur();
+	      if(in.eos())
+		break;
+	    }
 	  } else if (first==true) {
+	    // no retry if current point is a part of first starter
 	    break;
-	  } else if (in.next(prev_class, ppp)==true) { // XXX: name
-	    node_index = prev_node;
-	    ppp = in.cur();
+	  } else if (in.next_combining_char(retry_root_class, current_char_head)==true) { 
+	    // back previous code-point and retry
+	    node_index = retry_root_node;
+	    current_char_head = in.cur();
 	    goto retry;
 	  } else {
 	    break;
 	  }
-	}  	
+	}  
+	
 	if(last_matched_index != 0) {
+	  // append composed unicode-character and skipped combining-characters
 	  buf.append(value+nodes[last_matched_index].value());
-	  buf.append(in.skipped.data(), in.skipped.data()+rest);
-	  in.setCur(tail);
+	  buf.append(in.skipped.data(), in.skipped.data()+last_skip_tail_offset);
+	  in.setCur(last_matched_tail);
 	} else {
-	  in.setCur(beg+1);
-	  Util::eat_until_utf8_char_start_point(in);
+	  // append one unicode-character
+	  in.setCur(Util::nearest_utf8_char_start_point(beg+1));
 	  in.append(buf, beg, in.cur()); // XXX: name
 	}
       }

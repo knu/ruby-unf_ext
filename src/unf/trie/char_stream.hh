@@ -101,20 +101,20 @@ namespace UNF {
 	}
       }
       
-      unsigned char get_prev_class() const { 
+      unsigned char get_prev_canonical_class() const { 
 	return offset()-1 < classes.size() ? classes[offset()-1] : 0;
       }
 
-      unsigned char get_class() const { 
+      unsigned char get_canonical_class() const { 
 	return offset() < classes.size() ? classes[offset()] : 0;
       }
       
-      bool next(unsigned char prev_class, const char* ppp) {
+      bool next_combining_char(unsigned char prev_class, const char* ppp) {
 	while(Util::is_utf8_char_start_byte(peek()) == false)
 	  read();
 	
-	unsigned char mid_class = get_prev_class();
-	unsigned char cur_class = get_class();
+	unsigned char mid_class = get_prev_canonical_class();
+	unsigned char cur_class = get_canonical_class();
 
 	if(prev_class < cur_class && mid_class < cur_class) {
 	  skipped.append(ppp, cur());
@@ -122,7 +122,7 @@ namespace UNF {
 	} else {
 	  if(cur_class != 0) {
 	    read();
-	    return next(prev_class,ppp);
+	    return next_combining_char(prev_class,ppp);
 	  }
 	  return false;
 	}
