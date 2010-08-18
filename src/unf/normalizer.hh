@@ -71,9 +71,9 @@ namespace UNF {
 
     const char* compose_one(const char* starter, const char* rest_starter, std::string& buf) {
       Trie::CharStreamForComposition in(starter, rest_starter, canonical_classes, buffer3);
-      while(in.eos1()==false) // XXX: name, in.eos1()
+      while(in.within_first())
 	nf_c.compose(in, buf);
-      return rest_starter + in.over();
+      return in.cur();
     }
 
     void canonical_combining_class_ordering(char* beg, const char* end) {

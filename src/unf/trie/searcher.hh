@@ -183,7 +183,7 @@ namespace UNF {
 	} else {
 	  // append one unicode-character
 	  in.setCur(Util::nearest_utf8_char_start_point(beg+1));
-	  in.append(buf, beg, in.cur()); // XXX: name
+	  in.append_to_str(buf, beg);
 	}
       }
     };

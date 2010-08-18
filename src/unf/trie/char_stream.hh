@@ -40,8 +40,8 @@ namespace UNF {
     // TODO: 整理
     class CompoundCharStream {
     public:
-      CompoundCharStream(const char* s1, const char* s2) 
-	: beg1(s1), beg2(s2), cur1(s1), cur2(s2) {}
+      CompoundCharStream(const char* first, const char* second) 
+	: beg1(first), beg2(second), cur1(beg1), cur2(beg2) {}
 
       unsigned char read() { return !eos1() ? read1() : read2(); }
       unsigned char peek() const { return !eos1() ? *cur1 : *cur2; }
@@ -49,15 +49,7 @@ namespace UNF {
 
       const char* cur() const { return !eos1() ? cur1 : cur2; }
       bool eos() const { return eos1() && eos2(); }
-      bool eos1() const { return *cur1=='\0'; }
-      bool eos2() const { return *cur2=='\0'; }
-
-      bool range1(const char* p) const {
-	return beg1 <= p && p <= cur1;
-      }
-      
-      const char* p1() const { return cur1; }
-      const char* beg_2() const { return beg2; }
+      bool within_first() const { return !eos1(); }
 
       unsigned offset() const { return cur1-beg1 + cur2-beg2; }
       void setCur(const char* p) { 
@@ -69,13 +61,16 @@ namespace UNF {
 	}
       }
 
-      unsigned over() const { return cur2-beg2; }
-      
-    private:
+    protected:
       unsigned char read1() { return eos1() ? '\0' : *cur1++; }
       unsigned char read2() { return eos2() ? '\0' : *cur2++; }
-
-    private:
+      bool range1(const char* p) const {
+	return beg1 <= p && p <= cur1;
+      }
+      bool eos1() const { return *cur1=='\0'; }
+      bool eos2() const { return *cur2=='\0'; }
+      
+    protected:
       const char* beg1;
       const char* beg2;
       const char* cur1;
@@ -85,19 +80,19 @@ namespace UNF {
     // TODO: 整理
     class CharStreamForComposition : public CompoundCharStream {
     public:
-      CharStreamForComposition (const char* s1, const char* s2, 
+      CharStreamForComposition (const char* first, const char* second, 
 				const std::vector<unsigned char>& canonical_classes, 
 				std::string& buf)
-	: CompoundCharStream(s1, s2), classes(canonical_classes), skipped(buf) {
+	: CompoundCharStream(first, second), classes(canonical_classes), skipped(buf) {
 	skipped.clear();
       }
       
-      void append(std::string& s, const char* beg, const char* end) const {
-	if(range1(beg) && !range1(end)) {
-	  s.append(beg, p1());
-	  s.append(beg_2(),end);
+      void append_to_str(std::string& s, const char* beg) const {
+	if(eos1()==false) {
+	  s.append(beg, cur());
 	} else {
-	  s.append(beg,end);
+	  s.append(beg,  cur1);
+	  s.append(beg2, cur());
 	}
       }
       
