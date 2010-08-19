@@ -13,6 +13,9 @@
 namespace UNF {
   class Normalizer {
   public:
+    enum Form { FORM_NFD, FORM_NFC, FORM_NFKD, FORM_NFKC };
+
+  public:
     Normalizer()
       : nf_d(TABLE::CANONICAL_DECOM_NODES, TABLE::VALUE),
 	nf_kd(TABLE::COMPATIBILITY_DECOM_NODES, TABLE::VALUE),
@@ -22,8 +25,6 @@ namespace UNF {
 	ccc(TABLE::CANONICAL_CLASS_NODES)
     {}
 
-    enum Form { FORM_NFD, FORM_NFC, FORM_NFKD, FORM_NFKC };
-      
     const char* normalize(const char* src, Form form) {
       switch(form) {
       case FORM_NFD:  return nfd(src);
@@ -33,9 +34,9 @@ namespace UNF {
       default:        return src;
       }
     }
-    const char* nfd(const char* src) { return decompose(src, nf_d); }
+    const char* nfd(const char* src)  { return decompose(src, nf_d); }
     const char* nfkd(const char* src) { return decompose(src, nf_kd); }
-    const char* nfc(const char* src) { return compose(src, nf_c_qc, nf_d); }
+    const char* nfc(const char* src)  { return compose(src, nf_c_qc, nf_d); }
     const char* nfkc(const char* src) { return compose(src, nf_kc_qc, nf_kd); }
 
   private:
@@ -92,7 +93,7 @@ namespace UNF {
       ccc.sort(beg, canonical_classes);
     }
 
-    const char* next_invalid_char(const char* src, const Trie::NormalizationForm& nf) {
+    const char* next_invalid_char(const char* src, const Trie::NormalizationForm& nf) const {
       int last_canonical_class = 0;
       const char* cur = Util::nearest_utf8_char_start_point(src);
       const char* starter = cur;

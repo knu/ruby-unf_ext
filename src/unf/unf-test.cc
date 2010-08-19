@@ -6,6 +6,9 @@
 
 #define NF_TEST(form, correct, target) strcmp(correct.c_str(), form(target.c_str()))==0
 
+/**
+ * test function
+ */
 bool nfd_test(UNF::Normalizer& norm, const std::vector<std::string>& ary) {
   return 
     NF_TEST(norm.nfd, ary[2], ary[0]) &&
@@ -60,7 +63,9 @@ bool nf_test(const std::vector<std::string>& ary, UNF::Normalizer& norm, int ent
   return true;
 }
 
-
+/**
+ * main
+ */
 int main(int argc, char** argv) {
   if(argc != 1) {
     std::cerr << "Usage: unf-test" << std::endl;
