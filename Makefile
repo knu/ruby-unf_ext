@@ -1,5 +1,5 @@
 CXX=g++
-CXX_FLAGS=-O2 -Wall -ansi -pedantic
+CXX_FLAGS=-O2 -Wall -ansi -pedantic-errors
 
 COMMANDS=bin/unf bin/unf-test bin/unf-time bin/gen-unf-table
 SRC=src/unf
@@ -22,10 +22,6 @@ bin/unf-test: ${SRC}/unf-test.cc ${SRC}/normalizer.hh ${SRC}/table.hh ${SRC}/uti
 
 bin/unf-time: ${SRC}/unf-time.cc ${SRC}/normalizer.hh ${SRC}/table.hh ${SRC}/util.hh ${SEARCH_TRIES}
 	${CXX} ${CXX_FLAGS} -o ${@} ${<}
-
-install:
-	cp bin/* /usr/local/bin/
-	cp -r src/unf /usr/local/include/
 
 clean:
 	rm -f ${COMMANDS}
