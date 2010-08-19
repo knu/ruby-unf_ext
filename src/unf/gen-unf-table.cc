@@ -72,8 +72,9 @@ int main(int argc, char** argv) {
   // write value string
   out << "const char VALUE[]={" << std::endl;
   for(unsigned i=0; i < buffer.size(); i++) {
-    out << "0x" << std::hex << std::setw(2) << std::setfill('0') << std::right << std::hex 
-	<< static_cast<int>(static_cast<unsigned char>(buffer[i]));
+    out << std::setw(4) << std::setfill(' ') 
+	<< std::right << std::dec << static_cast<int>(buffer[i]);
+
     if(i+1 < buffer.size()) out << ',';
     if((i+1)%20==0)         out << std::endl;
   }
