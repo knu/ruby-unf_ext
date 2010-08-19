@@ -1,26 +1,97 @@
 [名前]
 ・unf
 
+
 [概要]
 ・Unicode正規化ライブラリおよびコマンド
-・C++
+・C++のヘッダライブラリ
 ・現バージョンではUTF-8にのみ対応
+・それなりに高速
+
 
 [バージョン]
-・0.0.1
+・unf
+　・0.0.1
+・準拠Unicode
+　・5.2.0
 
-[準拠Unicodeバージョン]
-・Unicode 5.2.0
 
-[コマンドのビルド方法]
-・コンパイラにGCCを用いる場合
-　・unfのルートディレクトリでmakeコマンドを実行する
-・その他
+[コマンドのビルド]
+・unfのルートディレクトリでmakeコマンドを実行する
+　・bin/以下にunf,unf-timeコマンドが作成される
+※ g++およびmakeコマンドが使用可能なことが前提
+※ g++が仕様不可の場合、他のANSI準拠のコンパイラ用にMakefileを書き換えることでビルド可能
+
 
 [コマンド]
+== bin/unf <D|C|KD|KD>:
+    - 文字列正規化コマンド
+    - 標準入力から読み込んだ文字列に、Unicode正規化処理を施し、標準出力に出力する
+    - 第一引数で正規化形式を指定する
+      -- D:  NFD, 正規分解
+      -- C:  NFC, 正規合成
+      -- KD: NFKD, 互換分解
+      -- KC: NFKC, 互換合成  
+
+== bin/unf-time
+    - 計時用コマンド
+    - 標準入力から読み込んだ文字列に対して、Unicode正規化処理を施し、所要時間を計測/出力する
+
 
 [C++ API]
+=======
+ファイル: src/unf/normalizer.hh
 
-[連絡先]
+namespace UNF {
+  class Normalizer {
+    public:
+    /*** 正規化形式 ***/
+    enum Form { FORM_NFD, FORM_NFC, FORM_NFKD, FORM_NFKC };
+
+    /*** コンストラクタ ***/
+    Normalizer();
+    
+    /*** 文字列正規化メソッド群 ***/
+    /**
+     * 文字列srcを、normalization_formに従って正規化する。
+     *
+     * src: 正規化対象文字列
+     * normalization_form: 正規化形式
+     *
+     * 返り値:
+     *  - 正規化後の文字列
+     *  - 返される文字列(ポインタ)は、次の二つの内のいずれか
+     *   -- 1] 引数の文字列(src)
+     *    --- 引数の文字列が既に正規化形式に沿っている場合は、それがそのまま返されることがある
+     *   -- 2] Normalizerインスタンスにより管理される内部バッファへのポインタ
+     *    --- 次回の正規化メソッド呼び出しあるいはインスタンスの破棄により、ポインタの値が不正となる可能性がある
+     *  - 正規化結果を永続的に安全に利用したい場合は、メソッド呼び出し元で明示的にコピーする必要がある
+     */
+    const char* normalize(const char* src, Form normalization_form);
+
+    /**
+     * 個別の文字列正規化メソッド
+     * それぞれ、normalizeメソッドの第二引数に、FORM_NFD/FORM_NFC/FORM_NFKD/FORM_NFKC、を渡した場合に等しい
+     */
+    const char* nfd(const char* src);
+    const char* nfc(const char* src);
+    const char* nfkd(const char* src);
+    const char* nfkc(const char* src);
+  };
+}
+
+
+[参考]
+・Unicode正規化仕様
+　・http://www.unicode.org/reports/tr15/
+・Unicodeの各種データ入手先
+　・http://unicode.org/Public/UNIDATA/
+
+
+[備考]
+・正規化用データ(src/unf/table.hh)の生成および正規化テストに関しては、unf-develを参照のこと
+
+
+[バグ報告/連絡先]
 ・phjgt308@gmail.com
 ・http://sourceforge.jp/ticket/newticket.php?group_id=5256
