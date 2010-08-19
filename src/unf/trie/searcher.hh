@@ -123,16 +123,13 @@ namespace UNF {
       }
 
       void compose(CharStreamForComposition& in, std::string& buf) const {
-	in.skipped.clear();
+	in.init_skipinfo();
 
 	const char* const beg = in.cur();
 	const char* current_char_head = in.cur();
-	const char* last_matched_tail = NULL;
+	const char* composed_char = NULL;
 	
 	unsigned node_index = 0;
-	unsigned last_skip_tail_offset = 0;
-	unsigned last_matched_index = 0;
-	
 	unsigned retry_root_node = 0;
 	unsigned char retry_root_class = 0;
 
@@ -153,9 +150,8 @@ namespace UNF {
 	    node_index = next_index;
 	    unsigned terminal_index = nodes[node_index].jump('\0');
 	    if(nodes[terminal_index].check_char()=='\0') {
-	      last_matched_index  = terminal_index;
-	      last_skip_tail_offset = in.skipped.size();
-	      last_matched_tail = in.cur();
+	      composed_char = value+nodes[terminal_index].value();
+	      in.mark_as_last_valid_point();
 	      if(in.eos() || retry_root_class > in.get_canonical_class())
 		break;
 	    }
@@ -172,15 +168,15 @@ namespace UNF {
 	  }
 	}  
 	
-	if(last_matched_index != 0) {
+	if(composed_char) {
 	  // append composed unicode-character and skipped combining-characters
-	  buf.append(value+nodes[last_matched_index].value());
-	  buf.append(in.skipped.data(), in.skipped.data()+last_skip_tail_offset);
-	  in.setCur(last_matched_tail);
+	  buf.append(composed_char);
+	  in.append_skipped_chars_to_str(buf);
+	  in.reset_at_marked_point();
 	} else {
 	  // append one unicode-character
 	  in.setCur(Util::nearest_utf8_char_start_point(beg+1));
-	  in.append_to_str(buf, beg);
+	  in.append_read_char_to_str(buf, beg);
 	}
       }
     };

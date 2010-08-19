@@ -1,10 +1,9 @@
 #ifndef UNF_TRIE_CHAR_STREAM_HH
 #define UNF_TRIE_CHAR_STREAM_HH
 
-#include <cstring>
 #include <vector>
 #include <string>
-#include "../util.hh"  // XXX:
+#include "../util.hh"
 
 namespace UNF {
   namespace Trie {
@@ -37,7 +36,6 @@ namespace UNF {
       const char* end_;
     };
 
-    // TODO: 整理
     class CompoundCharStream {
     public:
       CompoundCharStream(const char* first, const char* second) 
@@ -64,9 +62,6 @@ namespace UNF {
     protected:
       unsigned char read1() { return eos1() ? '\0' : *cur1++; }
       unsigned char read2() { return eos2() ? '\0' : *cur2++; }
-      bool range1(const char* p) const {
-	return beg1 <= p && p <= cur1;
-      }
       bool eos1() const { return *cur1=='\0'; }
       bool eos2() const { return *cur2=='\0'; }
       
@@ -77,17 +72,29 @@ namespace UNF {
       const char* cur2;
     };
 
-    // TODO: 整理
     class CharStreamForComposition : public CompoundCharStream {
     public:
       CharStreamForComposition (const char* first, const char* second, 
 				const std::vector<unsigned char>& canonical_classes, 
 				std::string& buf)
-	: CompoundCharStream(first, second), classes(canonical_classes), skipped(buf) {
-	skipped.clear();
-      }
+	: CompoundCharStream(first, second), classes(canonical_classes), skipped(buf) 
+      {}
       
-      void append_to_str(std::string& s, const char* beg) const {
+      void init_skipinfo() { 
+	skipped.clear();
+	skipped_tail = 0;
+      }
+
+      void mark_as_last_valid_point() {
+	skipped_tail = skipped.size();
+	marked_point = cur();
+      }
+
+      void reset_at_marked_point() {
+	setCur(marked_point);
+      }
+
+      void append_read_char_to_str(std::string& s, const char* beg) const {
 	if(eos1()==false) {
 	  s.append(beg, cur());
 	} else {
@@ -95,9 +102,9 @@ namespace UNF {
 	  s.append(beg2, cur());
 	}
       }
-      
-      unsigned char get_prev_canonical_class() const { 
-	return offset()-1 < classes.size() ? classes[offset()-1] : 0;
+
+      void append_skipped_chars_to_str(std::string& s) const {
+	s.append(skipped.begin(), skipped.begin()+skipped_tail);
       }
 
       unsigned char get_canonical_class() const { 
@@ -124,11 +131,18 @@ namespace UNF {
 	  }
 	  return false;
 	}
-      
       }
-      
+
+    private:
+      unsigned char get_prev_canonical_class() const { 
+	return offset()-1 < classes.size() ? classes[offset()-1] : 0;
+      }
+
+    private:
       const std::vector<unsigned char>& classes;
       std::string& skipped;
+      unsigned skipped_tail;
+      const char* marked_point;
     };
   }
 }

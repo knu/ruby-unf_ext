@@ -5,6 +5,9 @@
 #include "trie/searcher.hh"
 #include "normalizer.hh"
 
+/**
+ * clock function
+ */
 #ifdef __unix__
 
 #include <sys/time.h>
@@ -23,6 +26,9 @@ inline double gettime() {
 
 #endif
 
+/**
+ * main
+ */
 int main(int argc, char** argv) {
   UNF::Normalizer norm;
 
