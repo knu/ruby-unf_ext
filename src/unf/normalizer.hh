@@ -29,7 +29,7 @@ namespace UNF {
 
   private:
     const char* decompose(const char* src, const Trie::NormalizationForm& nf) {
-      const char* beg = next_invalid_char(src, nf, true);
+      const char* beg = next_invalid_char(src, nf);
       if(*beg=='\0')
 	return src;
       
@@ -37,7 +37,7 @@ namespace UNF {
       do {
 	const char* end = next_starter(beg);
 	decompose_one(beg, end, nf, buffer);
-	beg = next_invalid_char(end, nf, true);
+	beg = next_invalid_char(end, nf);
 	buffer.append(end, beg);
       } while(*beg!='\0');
       
