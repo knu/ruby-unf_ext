@@ -81,7 +81,7 @@ namespace UNF {
       ccc.sort(beg, canonical_classes);
     }
 
-    const char* next_invalid_char(const char* src, const Trie::NormalizationForm& nf, bool decomp_phase=false) {
+    const char* next_invalid_char(const char* src, const Trie::NormalizationForm& nf) {
       int last_canonical_class = 0;
       const char* cur = Util::nearest_utf8_char_start_point(src);
       const char* starter = cur;
