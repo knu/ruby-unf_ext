@@ -5,13 +5,23 @@
 #include "trie/searcher.hh"
 #include "normalizer.hh"
 
-#include <sys/time.h>
+#ifdef __unix__
 
+#include <sys/time.h>
 inline double gettime(){
   timeval tv;
   gettimeofday(&tv,NULL);
   return static_cast<double>(tv.tv_sec)+static_cast<double>(tv.tv_usec)/1000000.0;
 }
+
+#else
+
+#include <ctime>
+inline double gettime() {
+  return static_cast<double>(clock())/CLOCKS_PER_SEC;
+}
+
+#endif
 
 int main(int argc, char** argv) {
   UNF::Normalizer norm;
