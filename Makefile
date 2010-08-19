@@ -1,6 +1,5 @@
 CXX=g++
-CXX_FLAGS=-O2 -Wall
-CXX_SHARED_FLAGS=-shared -fPIC
+CXX_FLAGS=-O2 -Wall -ansi -pedantic
 
 COMMANDS=bin/unf bin/unf-test bin/unf-time bin/gen-unf-table
 SRC=src/unf

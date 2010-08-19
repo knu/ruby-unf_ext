@@ -1,0 +1,26 @@
+[名前]
+・unf
+
+[概要]
+・Unicode正規化ライブラリおよびコマンド
+・C++
+・現バージョンではUTF-8にのみ対応
+
+[バージョン]
+・0.0.1
+
+[準拠Unicodeバージョン]
+・Unicode 5.2.0
+
+[コマンドのビルド方法]
+・コンパイラにGCCを用いる場合
+　・unfのルートディレクトリでmakeコマンドを実行する
+・その他
+
+[コマンド]
+
+[C++ API]
+
+[連絡先]
+・phjgt308@gmail.com
+・http://sourceforge.jp/ticket/newticket.php?group_id=5256
