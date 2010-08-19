@@ -42,6 +42,25 @@ bool nfkc_test(UNF::Normalizer& norm, const std::vector<std::string>& ary) {
     NF_TEST(norm.nfkc, ary[3], ary[4]);
 }
 
+typedef bool (*TEST_FN_T) (UNF::Normalizer&, const std::vector<std::string>&);
+
+bool nf_test(const std::vector<std::string>& ary, UNF::Normalizer& norm, int entry_id) {
+  static const UNF::Normalizer::Form forms[] = {UNF::Normalizer::FORM_NFD, UNF::Normalizer::FORM_NFC,
+						UNF::Normalizer::FORM_NFKD,UNF::Normalizer::FORM_NFKC};
+  static const TEST_FN_T test_fn[] = {nfd_test, nfc_test, nfkd_test, nfkc_test};
+  static const char* form_names[5] = {"NFD ", "NFC ", "NFKD", "NFKC"};
+
+  for(int formid=0; formid < 4; formid++)
+    if(test_fn[formid](norm, ary)==false) {
+      std::cerr << "Failed(" << entry_id << "): " << form_names[formid] << std::endl;
+      for(unsigned i=0; i < ary.size(); i++) 
+	std::cerr << " " << ary[i] << "\t -> " << norm.normalize(ary[i].c_str(), forms[formid]) << std::endl;
+      return false;
+    }
+  return true;
+}
+
+
 int main(int argc, char** argv) {
   if(argc != 1) {
     std::cerr << "Usage: unf-test" << std::endl;
@@ -56,61 +75,19 @@ int main(int argc, char** argv) {
   while(std::getline(std::cin, line)) {
     if(ary.size()==5) {
       cnt++;
-      /*
-      std::cout << cnt << std::endl;
-      for(unsigned i=0; i < ary.size(); i++) 
-	std::cerr << " " << ary[i] << "\t -> " << norm.nfd(ary[i].c_str()) << std::endl;
-      */
-      if(nfd_test(norm, ary)==false) {
-	std::cerr << "Failed(" << cnt << "): NFD" << std::endl;
-	for(unsigned i=0; i < ary.size(); i++) 
-	  std::cerr << " " << ary[i] << "\t -> " << norm.nfd(ary[i].c_str()) << std::endl;
+      if(nf_test(ary, norm, cnt)==false)
 	return 1;
-      } 
-      if(nfkd_test(norm, ary)==false) {
-	std::cerr << "Failed(" << cnt << "): NFKD" << std::endl;
-	for(unsigned i=0; i < ary.size(); i++) 
-	  std::cerr << " " << ary[i] << "\t -> " << norm.nfkd(ary[i].c_str()) << std::endl;
-	return 1;
-      }
-      if(nfc_test(norm, ary)==false) {
-	std::cerr << "Failed(" << cnt << "): NFC" << std::endl;
-	for(unsigned i=0; i < ary.size(); i++) {
-	  std::cerr << " " << ary[i] << "\t -> " << norm.nfc(ary[i].c_str());
-	  std::cerr << " # ";
-	  for(unsigned j=0; j < ary[i].size(); j++) 
-	    std::cerr << (int)ary[i][j] << " ";
-	  std::cerr << " -> ";
-	  const char* s=norm.nfc(ary[i].c_str());
-	  for(; *s != '\0'; s++)
-	    std::cerr << (int)*s << " ";
-	  std::cerr << std::endl;
-	}
-	return 1;
-      } 
-      if(nfkc_test(norm, ary)==false) {
-	std::cerr << "Failed(" << cnt << "): NFKC" << std::endl;
-	for(unsigned i=0; i < ary.size(); i++) {
-	  std::cerr << " " << ary[i] << "\t -> " << norm.nfkc(ary[i].c_str());
-	  std::cerr << std::endl;
-	}
-	return 1;
-      } 
-      /*
-      if(nfkc_test(norm, ary)==false) {
-	std::cerr << "Failed(" << cnt << "): NFKC" << std::endl;
-	for(unsigned i=0; i < ary.size(); i++) 
-	  std::cerr << " " << ary[i] << "\t -> " << norm.nfkc(ary[i].c_str()) << std::endl;
-	return 1;
-      } 
-      */
       ary.clear();
-      //std::getline(std::cin, line); // eat empty line
     } else {
       ary.push_back(line);
     }
   }
+  if(ary.size()==5) {
+    cnt++;
+    if(nf_test(ary, norm, cnt)==false)
+      return 1;
+  }
   
-  std::cerr << "All tests passed!" << std::endl << std::endl;
+  std::cerr << "All tests passed!: " << cnt << " entries" << std::endl << std::endl;
   return 0;
 }

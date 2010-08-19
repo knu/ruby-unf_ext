@@ -15,18 +15,16 @@ int main(int argc, char** argv) {
   UNF::Normalizer norm;
 
   const char* fs = argv[1];
-  int form = eq(fs,"D") ? 0 : eq(fs,"C") ? 1 : eq(fs,"KD") ? 2 : eq(fs,"KC") ? 3 : 4;
-  if(form==4)
-    goto usage;
-
+  UNF::Normalizer::Form form;
+  if      (eq(fs,"D"))  form = UNF::Normalizer::FORM_NFD;
+  else if (eq(fs,"C"))  form = UNF::Normalizer::FORM_NFC;
+  else if (eq(fs,"KD")) form = UNF::Normalizer::FORM_NFKD;
+  else if (eq(fs,"KC")) form = UNF::Normalizer::FORM_NFKC;
+  else                  goto usage;
+    
   std::string line;
   while(std::getline(std::cin,line)) 
-    switch(form) {
-    case 0: std::cout << norm.nfd(line.c_str()) << std::endl; break;
-    case 1: std::cout << norm.nfc(line.c_str()) << std::endl; break;
-    case 2: std::cout << norm.nfkd(line.c_str()) << std::endl; break;
-    case 3: std::cout << norm.nfkc(line.c_str()) << std::endl; break;
-    }
+    std::cout << norm.normalize(line.c_str(), form) << std::endl;
 
   return 0;
 }
