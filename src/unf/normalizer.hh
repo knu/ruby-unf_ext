@@ -22,6 +22,17 @@ namespace UNF {
 	ccc(TABLE::CANONICAL_CLASS_NODES)
     {}
 
+    enum Form { FORM_NFD, FORM_NFC, FORM_NFKD, FORM_NFKC };
+      
+    const char* normalize(const char* src, Form form) {
+      switch(form) {
+      case FORM_NFD:  return nfd(src);
+      case FORM_NFC:  return nfc(src);
+      case FORM_NFKD: return nfkd(src);
+      case FORM_NFKC: return nfkc(src);
+      default:        return src;
+      }
+    }
     const char* nfd(const char* src) { return decompose(src, nf_d); }
     const char* nfkd(const char* src) { return decompose(src, nf_kd); }
     const char* nfc(const char* src) { return compose(src, nf_c_qc, nf_d); }
