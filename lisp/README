@@ -1,0 +1,3 @@
+- lispによるUnicode正規化の実装とunf用のデータ定義ファイルの生成
+　-- unf.lisp: Unicode正規化実装
+　-- gendef.lisp: unf用のデータ定義ファイルの生成

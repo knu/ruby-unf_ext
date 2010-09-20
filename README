@@ -1,0 +1,3 @@
+- unfの開発版
+- 変換テーブル生成ソース/データを含む
+- 本番用(?)のREADMEおよびMakefileには'.production'が付いている
