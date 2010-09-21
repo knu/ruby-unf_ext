@@ -47,7 +47,7 @@ namespace UNF {
       
       buffer.assign(src, beg);
       do {
-	const char* end = next_starter(beg);
+	const char* end = next_valid_starter(beg, nf);
 	decompose_one(beg, end, nf, buffer);
 	beg = next_invalid_char(end, nf);
 	buffer.append(end, beg);
@@ -111,13 +111,6 @@ namespace UNF {
 
 	last_canonical_class = canonical_class;
       }
-      return cur;
-    }
-
-    const char* next_starter(const char* src) const {
-      const char* cur = Util::nearest_utf8_char_start_point(src+1);
-      while(ccc.get_class(cur)!=0)
-	cur = Util::nearest_utf8_char_start_point(cur+1);
       return cur;
     }
 
