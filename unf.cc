@@ -1,4 +1,7 @@
 #include <ruby.h>
+#if defined(HAVE_RUBY_ENCODING_H)
+#include <ruby/encoding.h>
+#endif
 
 #include "unf/normalizer.hh"
 
@@ -41,7 +44,7 @@ extern "C" {
     UNF::Normalizer* ptr;
     Data_Get_Struct(self, UNF::Normalizer, ptr);
 
-    const char* src = StringValuePtr(source);
+    const char* src = StringValueCStr(source);
     const char* rlt;
     ID form_id = SYM2ID(normalization_form);
 
@@ -56,6 +59,10 @@ extern "C" {
     else
       rb_raise(rb_eArgError, "Specified Normalization-Form is unknown. Please select one from among :nfc, :nfd, :nfkc, :nfkd.");
 
+#if defined(HAVE_RUBY_ENCODING_H)
+    return rb_enc_str_new(rlt, strlen(rlt), rb_utf8_encoding());
+#else
     return rb_str_new2(rlt);
+#endif
   }
 }
