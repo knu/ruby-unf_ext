@@ -17,7 +17,7 @@ Description
           normalizer.normalize(string, :nfc) #=> string in NFC
         }
 
-* Compliant with Unicode 5.2.0 (for the moment)
+* Compliant with Unicode 6.0
 
 Requirement
 -----------
