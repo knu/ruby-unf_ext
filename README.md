@@ -9,13 +9,13 @@ Synopsis
 Description
 -----------
 
-* Normalizes UTF-8 strings in NFC, NFD, NFKC or NFKD
+* Normalizes UTF-8 strings into and from NFC, NFD, NFKC or NFKD
 
-    # For bulk conversion
-    normalizer = UNF::Normalizer.new
-    a_bunch_of_strings.map! { |string|
-      normalizer.normalize(string, :nfc) #=> string in NFC
-    }
+        # For bulk conversion
+        normalizer = UNF::Normalizer.new
+        a_bunch_of_strings.map! { |string|
+          normalizer.normalize(string, :nfc) #=> string in NFC
+        }
 
 * Compliant with Unicode 5.2.0 (for the moment)
 
