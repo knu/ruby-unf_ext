@@ -6,7 +6,8 @@
 #include "unf/normalizer.hh"
 
 extern "C" {
-  VALUE unf_new(VALUE klass);
+  VALUE unf_allocate(VALUE klass);
+  VALUE unf_initialize(VALUE self);
   VALUE unf_delete(UNF::Normalizer* ptr);
   VALUE unf_normalize(VALUE self, VALUE source, VALUE normalization_form);
 
@@ -19,7 +20,8 @@ extern "C" {
     VALUE mdl = rb_define_module("UNF");
 
     VALUE cls = rb_define_class_under(mdl, "Normalizer", rb_cObject);
-    rb_define_singleton_method(cls, "new", (VALUE (*)(...))unf_new, 0);
+    rb_define_alloc_func(cls, unf_allocate);
+    rb_define_method(cls, "initialize", (VALUE (*)(...))unf_initialize, 0);
     rb_define_method(cls, "normalize", (VALUE (*)(...))unf_normalize, 2);
 
     FORM_NFD = rb_intern("nfd");
@@ -28,11 +30,16 @@ extern "C" {
     FORM_NFKC= rb_intern("nfkc");
   }
 
-  VALUE unf_new(VALUE klass) {
+
+  VALUE unf_allocate(VALUE klass) {
     UNF::Normalizer* ptr;
     VALUE obj = Data_Make_Struct(klass, UNF::Normalizer, NULL, unf_delete, ptr);
     new ((void*)ptr) UNF::Normalizer;
     return obj;
+  }
+
+  VALUE unf_initialize(VALUE self) {
+    return self;
   }
 
   VALUE unf_delete(UNF::Normalizer* ptr) {
