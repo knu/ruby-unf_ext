@@ -6,7 +6,7 @@ SRC=src/unf
 BUILD_TRIES=${SRC}/trie/builder.hh ${SRC}/trie/char_stream.hh ${SRC}/trie/node_allocator.hh ${SRC}/trie/node.hh
 SEARCH_TRIES=${SRC}/trie/char_stream.hh ${SRC}/trie/node.hh ${SRC}/trie/searcher.hh
 
-UCD_URL=http://www.unicode.org/Public/5.2.0/ucd/
+UCD_URL=http://www.unicode.org/Public/UNIDATA/
 
 all: bin ${COMMANDS}
 
