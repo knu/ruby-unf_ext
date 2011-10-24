@@ -29,7 +29,7 @@ Requirement
 Installation
 ------------
 
-	gem install unf
+	gem install unf_ext
 
 Or:
 
