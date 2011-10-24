@@ -15,9 +15,9 @@ extern "C" {
   ID FORM_NFKD;
   ID FORM_NFKC;
 
-  void Init_unf() {
+  void Init_unf_ext() {
     VALUE mdl = rb_define_module("UNF");
-   
+
     VALUE cls = rb_define_class_under(mdl, "Normalizer", rb_cObject);
     rb_define_singleton_method(cls, "new", (VALUE (*)(...))unf_new, 0);
     rb_define_method(cls, "normalize", (VALUE (*)(...))unf_normalize, 2);

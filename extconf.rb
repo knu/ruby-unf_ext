@@ -1,4 +1,4 @@
 require 'mkmf'
 have_library('stdc++')
 have_header('ruby/encoding.h')
-create_makefile 'unf'
+create_makefile 'unf_ext'
