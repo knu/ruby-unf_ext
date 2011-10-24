@@ -28,7 +28,7 @@ bin/unf-time: ${SRC}/unf-time.cc ${SRC}/normalizer.hh ${SRC}/table.hh ${SRC}/uti
 clean:
 	rm -f ${COMMANDS}
 
-test: bin/unf-test
+test: bin/unf-test gentest
 	${<} < data/normalization-test.txt
 
 gen-table: bin/gen-unf-table
@@ -46,5 +46,11 @@ fetch-ucd:
 	@cd lisp; curl -O ${UCD_URL}CompositionExclusions.txt
 	@cd lisp; curl -O ${UCD_URL}DerivedNormalizationProps.txt
 	@cd lisp; curl -O ${UCD_URL}UnicodeData.txt
+	@cd ruby; curl -O ${UCD_URL}NormalizationTest.txt
 
 gendef: data/canonical-combining-class.def
+
+data/normalization-test.txt: ruby/NormalizationTest.txt
+	@ruby/gentest.rb
+
+gentest: data/normalization-test.txt
