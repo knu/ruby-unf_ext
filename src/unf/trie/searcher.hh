@@ -11,8 +11,8 @@ namespace UNF {
   namespace Trie {
     class Searcher {
     public:
-      Searcher(const Node* nodes, const Node2* nodes2, const unsigned root, const unsigned* vals, const char* value=NULL)
-	: nodes(nodes), nodes2(nodes2), root(root), vals(vals), value(value) {}
+      Searcher(const Node* nodes, const Node2* nodes2, const unsigned root, const unsigned* vals, const char* strs, const char* value=NULL)
+	: nodes(nodes), nodes2(nodes2), root(root), vals(vals), strs(strs), value(value) {}
 
       unsigned find_value(const char* key, int default_value) const {
         Node2 node = nodes2[root];
@@ -34,13 +34,14 @@ namespace UNF {
       const Node2* nodes2;
       const unsigned root;
       const unsigned* vals;
+      const char* strs;
       const char* value;
     }; 
     
     class CanonicalCombiningClass : private Searcher {
     public:
-      CanonicalCombiningClass(const unsigned* node_uints, const unsigned* nodes, unsigned root, const unsigned* vals)
-	: Searcher(Node::from_uint_array(node_uints), Node2::from_uint_array(nodes), root, vals) {}
+      CanonicalCombiningClass(const unsigned* node_uints, const unsigned* nodes, unsigned root, const unsigned* vals, const char* strs)
+	: Searcher(Node::from_uint_array(node_uints), Node2::from_uint_array(nodes), root, vals, strs) {}
       
       unsigned get_class(const char* str) const { return find_value(str,0); }
 
@@ -104,8 +105,8 @@ namespace UNF {
 
     class NormalizationForm : private Searcher {
     public:
-      NormalizationForm(const unsigned* node_uints, const unsigned* nodes, unsigned root, const unsigned* vals, const char* value=NULL)
-	: Searcher(Node::from_uint_array(node_uints), Node2::from_uint_array(nodes), root, vals, value) {} 
+      NormalizationForm(const unsigned* node_uints, const unsigned* nodes, unsigned root, const unsigned* vals,  const char* strs, const char* value=NULL)
+	: Searcher(Node::from_uint_array(node_uints), Node2::from_uint_array(nodes), root, vals, strs, value) {} 
 
       // TODO: set的な検索は専用メソッドを設ける
       bool quick_check(const char* key) const { return find_value(key,0xFFFFFFFF)==0xFFFFFFFF; }
@@ -114,20 +115,25 @@ namespace UNF {
       loop_head:
 	const char* beg = in.cur();
 
-	for(unsigned node_index=0;;) {
-	  node_index = nodes[node_index].jump(in.read());
-	  if(nodes[node_index].check_char()==in.prev()) {
-	    unsigned terminal_index = nodes[node_index].jump('\0');
-	    if(nodes[terminal_index].check_char()=='\0') {
-              word_append(buffer, value, nodes[terminal_index].value());
-	      beg = in.cur();
-	      break;
-	    }
-	  } else {
-	    Util::eat_until_utf8_char_start_point(in);
-	    buffer.append(beg, in.cur());
-	    break;
-	  }
+        Node2 node = nodes2[root];
+        int id = node.inc_id(-1);
+	for(;; id=node.inc_id(id)) {
+          if(node.is_terminal()) {
+            word_append2(buffer, strs, vals[id]);
+            beg = in.cur();
+            break;
+          }
+
+          if(in.eos() || node.check_encoded_children(in)==false) 
+            goto failed;
+          
+	  node = nodes2[node.jump(in.read())];
+	  if(node.check_char() == in.prev())
+            continue;
+        failed:
+          Util::eat_until_utf8_char_start_point(in);
+          buffer.append(beg, in.cur());
+          break;
 	}  
 
 	if(in.eos()==false)
@@ -197,6 +203,12 @@ namespace UNF {
       static void word_append(std::string& buffer, const char* base, unsigned info) {
         unsigned offset = info & MappingKey::OFFSET_BITMASK;
         unsigned length = info >> MappingKey::OFFSET_BITLEN;
+        buffer.append(base+offset, base+offset+length);
+      }
+
+      static void word_append2(std::string& buffer, const char* base, unsigned info) {
+        unsigned offset = info & 0xFFFFFF;
+        unsigned length = info >> 24;
         buffer.append(base+offset, base+offset+length);
       }
     };

@@ -27,7 +27,8 @@ namespace UNF {
         return id + (is_terminal() ? 1 : 0) + sibling_total();
       }
 
-      bool check_encoded_children(CharStream& in) const {
+      template<class T>
+      bool check_encoded_children(T& in) const {
         switch(type()) {
         case 0:
           //          std::cout << "@ " << (int)in.peek() << std::endl;
