@@ -29,25 +29,6 @@ namespace UNF {
 	}
       } 
 
-
-      /*
-      unsigned find_value(const char* key, int default_value) const {
-        std::cout << "# " << key << " : " << root << std::endl;
-        unsigned node_index=0;
-        for(CharStream in(key);; in.read()) {
-          node_index = nodes[node_index].jump(in.peek());
-          if(nodes[node_index].check_char()==in.peek()) {
-            unsigned terminal_index = nodes[node_index].jump('\0');
-            if(nodes[terminal_index].check_char()=='\0') {
-              std::cout << " => " << nodes[terminal_index].value() << std::endl;
-              return nodes[terminal_index].value();
-            }
-          } else
-            return default_value;
-        }
-      }
-      */
-
     protected:
       const Node* nodes;
       const Node2* nodes2;
@@ -71,28 +52,32 @@ namespace UNF {
 
       loop_head:
 	unsigned beg = in.cur()-str;
-	
-	for(unsigned node_index=0;;){
-	  node_index = nodes[node_index].jump(in.read());
-	  
-	  if(nodes[node_index].check_char()==in.prev()) {
-	    unsigned terminal_index = nodes[node_index].jump('\0');
-	    if(nodes[terminal_index].check_char()=='\0') {
-	      if((unicode_char_count++)==0)
+	Node2 node = nodes2[root];
+        int id = node.inc_id(-1);
+	for(;; id=node.inc_id(id)) {
+          if(node.is_terminal()) {
+            if((unicode_char_count++)==0)
 		sort_beg = beg;
 	      sort_end = in.cur()-str;
 	      
-	      unsigned char klass = nodes[terminal_index].value();
+	      unsigned char klass = vals[id];
 	      for(unsigned i=beg; i < sort_end; i++) 
 		classes[i] = klass;
  	      break;
-	    }
-	  } else {
-	    if(unicode_char_count > 1)
-	      bubble_sort(str, classes, sort_beg, sort_end);
-	    unicode_char_count = 0;
-	    break;
-	  }
+          }
+
+          if(in.eos() || node.check_encoded_children(in)==false)
+            goto failed;
+          
+          node = nodes2[node.jump(in.read())];
+          if(node.check_char() != in.prev())
+            goto failed;
+          continue;
+        failed:
+          if(unicode_char_count > 1)
+            bubble_sort(str, classes, sort_beg, sort_end);
+          unicode_char_count = 0;
+          break;
 	} 
 	Util::eat_until_utf8_char_start_point(in);
 
@@ -122,6 +107,7 @@ namespace UNF {
       NormalizationForm(const unsigned* node_uints, const unsigned* nodes, unsigned root, const unsigned* vals, const char* value=NULL)
 	: Searcher(Node::from_uint_array(node_uints), Node2::from_uint_array(nodes), root, vals, value) {} 
 
+      // TODO: set的な検索は専用メソッドを設ける
       bool quick_check(const char* key) const { return find_value(key,0xFFFFFFFF)==0xFFFFFFFF; }
 
       void decompose(RangeCharStream in, std::string& buffer) const {
