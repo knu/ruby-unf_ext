@@ -146,24 +146,27 @@ namespace UNF {
         unsigned composed_char_info = 0;
 	
         Node2 node = nodes2[root];
-        int id = node.inc_id(-1);
+        int id = -1;
          
 	Node2 retry_root_node = nodes2[root];
+        int retry_id = id;
+        
 	unsigned char retry_root_class = 0;
 
-	for(bool first=true;; node.inc_id(id)) {
+	for(bool first=true;;) {
 	  if(Util::is_utf8_char_start_byte(in.peek())) {
 	    if(!(node == nodes2[root]))
 	      first=false;
 	    current_char_head = in.cur();
 
 	    retry_root_node = node;
+            retry_id = id;
 	    retry_root_class = in.get_canonical_class();
 	  }
 
 	retry:
           if(node.is_terminal()) {
-            composed_char_info = vals[id];
+            composed_char_info = vals[node.inc_id(id)];
             
             in.mark_as_last_valid_point();
             if(in.eos() || retry_root_class > in.get_canonical_class())
@@ -173,9 +176,12 @@ namespace UNF {
           if(in.eos() || node.check_encoded_children(in)==false) 
             goto failed;
           
-          node = nodes2[node.jump(in.read())];
-          if(node.check_char() == in.prev())
+          {Node2 next = nodes2[node.jump(in.read())];
+          if(next.check_char() == in.prev()) {
+            id = node.inc_id(id);
+            node = next;
             continue;
+          }}
           
         failed:
           if (first==true) {
@@ -184,6 +190,7 @@ namespace UNF {
           } else if (in.next_combining_char(retry_root_class, current_char_head)==true) { 
             // back previous code-point and retry
             node = retry_root_node;
+            id = retry_id;
             current_char_head = in.cur();
             goto retry;
           } else {
