@@ -11,8 +11,8 @@ namespace UNF {
   namespace Trie {
     class Searcher {
     public:
-      Searcher(const Node* nodes, const Node2* nodes2, const unsigned root, const unsigned* vals, const char* strs, const char* value=NULL)
-	: nodes(nodes), nodes2(nodes2), root(root), vals(vals), strs(strs), value(value) {}
+      Searcher(const Node2* nodes2, const unsigned root, const unsigned* vals, const char* strs)
+	: nodes2(nodes2), root(root), vals(vals), strs(strs) {}
 
       unsigned find_value(const char* key, int default_value) const {
         Node2 node = nodes2[root];
@@ -30,18 +30,16 @@ namespace UNF {
       } 
 
     protected:
-      const Node* nodes;
       const Node2* nodes2;
       const unsigned root;
       const unsigned* vals;
       const char* strs;
-      const char* value;
     }; 
     
     class CanonicalCombiningClass : private Searcher {
     public:
-      CanonicalCombiningClass(const unsigned* node_uints, const unsigned* nodes, unsigned root, const unsigned* vals, const char* strs)
-	: Searcher(Node::from_uint_array(node_uints), Node2::from_uint_array(nodes), root, vals, strs) {}
+      CanonicalCombiningClass(const unsigned* nodes, unsigned root, const unsigned* vals, const char* strs)
+	: Searcher(Node2::from_uint_array(nodes), root, vals, strs) {}
       
       unsigned get_class(const char* str) const { return find_value(str,0); }
 
@@ -105,8 +103,8 @@ namespace UNF {
 
     class NormalizationForm : private Searcher {
     public:
-      NormalizationForm(const unsigned* node_uints, const unsigned* nodes, unsigned root, const unsigned* vals,  const char* strs, const char* value=NULL)
-	: Searcher(Node::from_uint_array(node_uints), Node2::from_uint_array(nodes), root, vals, strs, value) {} 
+      NormalizationForm(const unsigned* nodes, unsigned root, const unsigned* vals,  const char* strs)
+	: Searcher(Node2::from_uint_array(nodes), root, vals, strs) {} 
 
       // TODO: set的な検索は専用メソッドを設ける
       bool quick_check(const char* key) const { return find_value(key,0xFFFFFFFF)==0xFFFFFFFF; }
@@ -147,49 +145,55 @@ namespace UNF {
 	const char* current_char_head = in.cur();
         unsigned composed_char_info = 0;
 	
-	unsigned node_index = 0;
-	unsigned retry_root_node = 0;
+        Node2 node = nodes2[root];
+        int id = node.inc_id(-1);
+         
+	Node2 retry_root_node = nodes2[root];
 	unsigned char retry_root_class = 0;
 
-	for(bool first=true;;) {
+	for(bool first=true;; node.inc_id(id)) {
 	  if(Util::is_utf8_char_start_byte(in.peek())) {
-	    if(node_index != 0)
+	    if(!(node == nodes2[root]))
 	      first=false;
 	    current_char_head = in.cur();
 
-	    retry_root_node = node_index;
+	    retry_root_node = node;
 	    retry_root_class = in.get_canonical_class();
 	  }
 
 	retry:
-	  unsigned next_index = nodes[node_index].jump(in.read());
-	  if(nodes[next_index].check_char()==in.prev()) {
-	    // succeeded
-	    node_index = next_index;
-	    unsigned terminal_index = nodes[node_index].jump('\0');
-	    if(nodes[terminal_index].check_char()=='\0') {
-	      composed_char_info = nodes[terminal_index].value();
-              
-	      in.mark_as_last_valid_point();
-	      if(in.eos() || retry_root_class > in.get_canonical_class())
-		break;
-	    }
-	  } else if (first==true) {
-	    // no retry if current point is a part of first starter
-	    break;
-	  } else if (in.next_combining_char(retry_root_class, current_char_head)==true) { 
-	    // back previous code-point and retry
-	    node_index = retry_root_node;
-	    current_char_head = in.cur();
-	    goto retry;
-	  } else {
-	    break;
-	  }
-	}  
+          if(node.is_terminal()) {
+            composed_char_info = vals[id];
+            
+            in.mark_as_last_valid_point();
+            if(in.eos() || retry_root_class > in.get_canonical_class())
+              break;
+          }
+          
+          if(in.eos() || node.check_encoded_children(in)==false) 
+            goto failed;
+          
+          node = nodes2[node.jump(in.read())];
+          if(node.check_char() == in.prev())
+            continue;
+          
+        failed:
+          if (first==true) {
+            // no retry if current point is a part of first starter
+            break;
+          } else if (in.next_combining_char(retry_root_class, current_char_head)==true) { 
+            // back previous code-point and retry
+            node = retry_root_node;
+            current_char_head = in.cur();
+            goto retry;
+          } else {
+            break;
+          }
+        }
 	
-	if(composed_char_info != 0) {
+        if(composed_char_info != 0) {
 	  // append composed unicode-character and skipped combining-characters
-          word_append(buf, value, composed_char_info);
+          word_append2(buf, strs, composed_char_info);
 	  in.append_skipped_chars_to_str(buf);
 	  in.reset_at_marked_point();
 	} else {

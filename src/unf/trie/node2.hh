@@ -49,6 +49,10 @@ namespace UNF {
       static const Node2* from_uint_array(const unsigned* node_uints)
       { return reinterpret_cast<const Node2*>(node_uints); }
 
+      bool operator==(const Node2& x) const {
+        return high == x.high && low == x.low;
+      }
+      
     private:
       unsigned base() const { return low & 0x1FFFFFFF; }
 
