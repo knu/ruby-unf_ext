@@ -57,15 +57,15 @@ int main(int argc, char** argv) {
   if(read_mapping_definition(CAN_COM_FILE, "CANONICAL_COM", out, buffer)==false)
     return 1;
 
-  std::cout << "  == canonical combining class" << std::endl;
+  std::cerr << "  == canonical combining class" << std::endl;
   if(read_char_attr_definition(CCC_FILE, "CANONICAL_CLASS", out)==false)
     return 1;
 
-  std::cout << "  == NFC illegal character list" << std::endl;
+  std::cerr << "  == NFC illegal character list" << std::endl;
   if(read_char_attr_definition(NFC_ILLEGAL_FILE, "NFC_ILLEGAL", out)==false)
     return 1;
 
-  std::cout << "  == NFKC illegal character list" << std::endl;
+  std::cerr << "  == NFKC illegal character list" << std::endl;
   if(read_char_attr_definition(NFKC_ILLEGAL_FILE, "NFKC_ILLEGAL", out)==false)
     return 1;
 
@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
       << "}" << std::endl
       << "#endif" << std::endl;
   
-  std::cout << "DONE" << std::endl;
+  std::cerr << "DONE" << std::endl;
   return 0;
 }
 
