@@ -3,6 +3,7 @@
 
 #include "char_stream.hh"
 #include "node.hh"
+#include "builder.hh"
 #include "../util.hh"
 
 namespace UNF {
@@ -92,6 +93,13 @@ namespace UNF {
     };
 
     class NormalizationForm : private Searcher {
+    private:
+      static void word_append(std::string& buffer, const char* base, unsigned info) {
+        unsigned offset = info & MappingKey::OFFSET_BITMASK;
+        unsigned length = info >> MappingKey::OFFSET_BITLEN;
+        buffer.append(base+offset, base+offset+length);
+      }
+      
     public:
       NormalizationForm(const unsigned* node_uints, const char* value=NULL)
 	: Searcher(Node::from_uint_array(node_uints), value) {} 
@@ -107,7 +115,7 @@ namespace UNF {
 	  if(nodes[node_index].check_char()==in.prev()) {
 	    unsigned terminal_index = nodes[node_index].jump('\0');
 	    if(nodes[terminal_index].check_char()=='\0') {
-	      buffer.append(value+nodes[terminal_index].value());
+              word_append(buffer, value, nodes[terminal_index].value());
 	      beg = in.cur();
 	      break;
 	    }
@@ -127,7 +135,7 @@ namespace UNF {
 
 	const char* const beg = in.cur();
 	const char* current_char_head = in.cur();
-	const char* composed_char = NULL;
+        unsigned composed_char_info = 0;
 	
 	unsigned node_index = 0;
 	unsigned retry_root_node = 0;
@@ -150,7 +158,8 @@ namespace UNF {
 	    node_index = next_index;
 	    unsigned terminal_index = nodes[node_index].jump('\0');
 	    if(nodes[terminal_index].check_char()=='\0') {
-	      composed_char = value+nodes[terminal_index].value();
+	      composed_char_info = nodes[terminal_index].value();
+              
 	      in.mark_as_last_valid_point();
 	      if(in.eos() || retry_root_class > in.get_canonical_class())
 		break;
@@ -168,9 +177,9 @@ namespace UNF {
 	  }
 	}  
 	
-	if(composed_char) {
+	if(composed_char_info != 0) {
 	  // append composed unicode-character and skipped combining-characters
-	  buf.append(composed_char);
+          word_append(buf, value, composed_char_info);
 	  in.append_skipped_chars_to_str(buf);
 	  in.reset_at_marked_point();
 	} else {

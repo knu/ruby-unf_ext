@@ -37,16 +37,22 @@ namespace UNF {
     typedef std::vector<AttrKey> AttrKeyList;
     
     struct MappingKey : public Key {
-      MappingKey(const std::string& key, const std::string& value, std::string& buffer) 
-	: Key(key), value_start_pos(buffer.size()) {
-	buffer += value;
-	buffer += '\0';
-      }
-      MappingKey(const std::string& key, unsigned value_start_pos) 
-	: Key(key), value_start_pos(value_start_pos) {}
-      virtual void set_node_value(Node& node) { node.set_value(value_start_pos); }
+      static const unsigned OFFSET_BITLEN = 18;
+      static const unsigned OFFSET_BITMASK = 0x3FFFF;
 
-      unsigned value_start_pos;
+      MappingKey(const std::string& key, const std::string& value, std::string& buffer) 
+	: Key(key) {
+        value_info = (value.size()<<OFFSET_BITLEN) | buffer.size();
+	buffer += value;
+      }
+      MappingKey(const std::string& key, const std::string& value, unsigned value_info) 
+	: Key(key) {
+        this->value_info = (value.size()<<OFFSET_BITLEN) | (value_info&OFFSET_BITMASK);
+      }
+      
+      virtual void set_node_value(Node& node) { node.set_value(value_info); }
+
+      unsigned value_info;
     };
     typedef std::vector<MappingKey> MappingKeyList;
     

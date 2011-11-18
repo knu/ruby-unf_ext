@@ -112,11 +112,11 @@ bool read_mapping_definition(const char* filepath, const char* prefix, std::ofst
     // search sharable value
     //  - using liner search (for simplicity)
     //  - very slow
-    std::size_t pos = buffer.find(value+'\0');
+    std::size_t pos = buffer.find(value);
     if(pos == std::string::npos)
       keys.push_back(MappingKey(key, value, buffer));
     else
-      keys.push_back(MappingKey(key, pos));
+      keys.push_back(MappingKey(key, value, pos));
   }
   std::sort(keys.begin(), keys.end());
 
