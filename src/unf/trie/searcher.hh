@@ -13,14 +13,12 @@ namespace UNF {
 	: nodes(nodes), root(root), value(value) {}
 
       unsigned find_value(const char* key, int default_value) const {
-        //std::cout << "# " << key << std::endl;
 	unsigned node_index=root;
 	for(CharStream in(key);; in.read()) {
 	  node_index = nodes[node_index].jump(in.peek());
 	  if(nodes[node_index].check_char()==in.peek()) {
 	    unsigned terminal_index = nodes[node_index].jump('\0'); 
 	    if(nodes[terminal_index].check_char()=='\0') {
-              //std::cout << " => " << nodes[terminal_index].value() << std::endl;
 	      return nodes[terminal_index].value();
             }
 	  } else
@@ -96,11 +94,6 @@ namespace UNF {
     };
 
     class NormalizationForm : private Searcher {
-    private:
-      // TODO: => word_append
-      static unsigned v_start(unsigned v) { return v&0x3FFFF; }
-      static unsigned v_end(unsigned v) { return v_start(v)+(v>>18); }
-      
     public:
       NormalizationForm(const unsigned* node_uints, unsigned root, const char* value=NULL)
 	: Searcher(Node::from_uint_array(node_uints), root, value) {} 
@@ -116,8 +109,7 @@ namespace UNF {
 	  if(nodes[node_index].check_char()==in.prev()) {
 	    unsigned terminal_index = nodes[node_index].jump('\0');
 	    if(nodes[terminal_index].check_char()=='\0') {
-              unsigned v = nodes[terminal_index].value();
-	      buffer.append(value+v_start(v), value+v_end(v));
+              word_append(buffer, value, nodes[terminal_index].value());
 	      beg = in.cur();
 	      break;
 	    }
@@ -137,8 +129,7 @@ namespace UNF {
 
 	const char* const beg = in.cur();
 	const char* current_char_head = in.cur();
-	const char* composed_char = NULL;
-        const char* composed_char_end = NULL;
+	unsigned composed_char_info = 0;
 	
 	unsigned node_index = root;
 	unsigned retry_root_node = root;
@@ -161,9 +152,7 @@ namespace UNF {
 	    node_index = next_index;
 	    unsigned terminal_index = nodes[node_index].jump('\0');
 	    if(nodes[terminal_index].check_char()=='\0') {
-              unsigned v = nodes[terminal_index].value();
-	      composed_char = value+v_start(v);
-              composed_char_end = value+v_end(v);
+	      composed_char_info = nodes[terminal_index].value();
               
 	      in.mark_as_last_valid_point();
 	      if(in.eos() || retry_root_class > in.get_canonical_class())
@@ -182,9 +171,9 @@ namespace UNF {
 	  }
 	}  
 	
-	if(composed_char) {
+	if(composed_char_info != 0) {
 	  // append composed unicode-character and skipped combining-characters
-	  buf.append(composed_char, composed_char_end);
+	  word_append(buf, value, composed_char_info);
 	  in.append_skipped_chars_to_str(buf);
 	  in.reset_at_marked_point();
 	} else {
@@ -192,6 +181,11 @@ namespace UNF {
 	  in.setCur(Util::nearest_utf8_char_start_point(beg+1));
 	  in.append_read_char_to_str(buf, beg);
 	}
+      }
+      
+    private:
+      static void word_append(std::string& buffer, const char* base, unsigned pos_info) {
+        buffer.append(base+(pos_info&0x3FFFF), pos_info>>18);
       }
     };
   }
