@@ -7,7 +7,7 @@
 #include <cstring>
 #include "trie/searcher.hh"
 #include "trie/char_stream.hh"
-#include "table2.hh"
+#include "table.hh"
 #include "util.hh"
 
 namespace UNF {
@@ -17,12 +17,12 @@ namespace UNF {
 
   public:
     Normalizer()
-      : nf_d(TABLE::NODES, TABLE::CANONICAL_DECOM_ROOT, TABLE::VALUES, TABLE::STRINGS),
-	nf_kd(TABLE::NODES, TABLE::COMPATIBILITY_DECOM_ROOT, TABLE::VALUES,TABLE::STRINGS),
-	nf_c(TABLE::NODES, TABLE::CANONICAL_COM_ROOT, TABLE::VALUES,TABLE::STRINGS),
-	nf_c_qc(TABLE::NODES, TABLE::NFC_ILLEGAL_ROOT, TABLE::VALUES, TABLE::STRINGS),
-	nf_kc_qc(TABLE::NODES, TABLE::NFKC_ILLEGAL_ROOT, TABLE::VALUES, TABLE::STRINGS),
-	ccc(TABLE::NODES, TABLE::CANONICAL_CLASS_ROOT, TABLE::VALUES, TABLE::STRINGS)
+      : nf_d(TABLE::CANONICAL_DECOM_NODES, TABLE::VALUE),
+	nf_kd(TABLE::COMPATIBILITY_DECOM_NODES, TABLE::VALUE),
+	nf_c(TABLE::CANONICAL_COM_NODES, TABLE::VALUE),
+	nf_c_qc(TABLE::NFC_ILLEGAL_NODES),
+	nf_kc_qc(TABLE::NFKC_ILLEGAL_NODES),
+	ccc(TABLE::CANONICAL_CLASS_NODES)
     {}
 
     const char* normalize(const char* src, Form form) {
