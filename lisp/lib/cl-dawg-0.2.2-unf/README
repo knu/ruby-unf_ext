@@ -1,0 +1,98 @@
+[概要]
+・DAWG(Direct Acyclic Word Graph)によるマップの実装
+・入力キーセットを静的に受け取り、各キーに一意なIDをマッピングする
+　・入力キーセットはソート済みであり、かつ各キーはユニークでなければならない
+　・キーのID == 先頭から数えたキーの出現位置、となる  ※ 先頭のキーのID値は0となる
+・数千万程度のキーセットをCommon Lispで比較的手軽に扱えるようにするのが目的
+　・2～4GBのメモリを積んでいる32bitマシンで
+・masterからSBCLへの依存性を排除したブランチ
+
+
+[バージョン]
+・0.2.2
+
+
+[依存パッケージ]
+・dict-0.0.2
+　・ポータブルなハッシュテーブル
+　・https://github.com/sile/dict
+
+
+[インストール]
+> (require :asdf)
+> (require :asdf-install)
+> (asdf-install:install "cl-dawg-VERSION.tar.gz")
+
+
+[API]
+###
+# dawg
+　メインパッケージ
+
+####
+# dawg:build (&key input output byte-order show-progress) => t
+　キーセットファイル※1からDAWGインデックスファイル※2を作成する。
+　= input: 入力キーセットファイルのパス名 or キーセットが格納されたリスト (必須)
+　= output: 出力DAWGインデックスファイルのパス名 (必須)
+　= byte-order: インデックスファイルのバイトオーダーを指定する。:native or :big or :little
+　　　　　　　　デフォルトは :native                
+　= show-progress: 作成時の進捗表示を行うかどうか。デフォルトはnil
+
+※1: キーセットが昇順に改行区切りで格納されているファイル
+※2: 正確にはDAWGをDoubleArray形式で保存したインデックスファイル
+
+####
+# dawg:load (index-path &key byte-order) => dawg:dawg
+　DAWGインデックスファイルからDAWG(DoubleArray形式)を読み込む。
+　= index-path: build関数で作成したDAWGインデックスファイル
+　= byte-order: インデックスファイルのバイトオーダーを指定する。:native or :big or :little
+　　　　　　　　デフォルトは :native                
+
+###
+# dawg:member? (key dawg &key start end) => boolean
+　キーがDAWGに含まれているかどうかを判定する。
+　= key: 対象のキー文字列。(simple-array character)型でなければならない
+　= dawg: DAWG
+　= start: キー文字列内の開始位置
+　= end: キー文字列内の終端位置
+
+###
+# dawg:get-id (key dawg &key start end) => (or null fixnum)
+　キーに紐付くIDを取得する。
+　キーがDAWG内に存在しない場合はnilを返す。
+　= key: 対象のキー文字列。(simple-array character)型でなければならない
+　= dawg: DAWG
+　= start: キー文字列内の開始位置
+　= end: キー文字列内の終端位置
+　
+###
+# dawg:each-common-prefix ((match-id match-end) 
+                           (key dawg &key start end) 
+                           &body body)
+　入力キーに対して共通接頭辞検索を行う。
+　入力キーの接頭辞部分にマッチするDAWG内の各キーに対して、body部分の処理が実行される。
+　※ return関数を使うことで、途中でループを抜けることが可能
+　= match-id: 入力キーの接頭辞部分にマッチしたキーのID値
+　= match-end: 入力キー内のマッチした部分の終端位置
+　= key: 入力キー文字列。(simple-array character)型でなければならない
+　= start: キー文字列内の開始位置
+　= end: キー文字列内の終端位置
+　= body: マッチの度に実行される式
+
+###
+# dawg:each-predictive ((match-id)
+                        (key dawg &key start end) 
+                        &body body)
+　入力キーが接頭辞となる全ての要素を走査する。
+　各走査で要素のIDを受け取り、body部分の処理が実行される。
+　※ return関数を使うことで、途中でループを抜けることが可能
+　= match-id: 入力キーが接頭辞となる要素のID値
+　= key: 入力キー文字列。(simple-array character)型でなければならない
+　= start: キー文字列内の開始位置
+　= end: キー文字列内の終端位置
+　= body: マッチの度に実行される式
+
+
+[注意事項]
+・DAWGのキー内の文字にヌル文字を含めることは出来ない
+　・DoubleArray中で(CHECK配列の初期値として)特別扱いしているため
