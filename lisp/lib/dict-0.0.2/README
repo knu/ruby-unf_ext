@@ -1,0 +1,35 @@
+[概要]
+・ハッシュテーブル
+
+[API]
+= package# dict
+　メインパッケージ
+
+= function# (make &key test hash) => dict
+　ハッシュテーブルを作成する。
+　- test: キーの等値性判定関数。デフォルトは#'eql。
+　- hash: キーのハッシュ値算出関数。デフォルトは#'sxhash。
+
+= function# (count dict) => count
+　ハッシュテーブルに格納されている要素数を取得する。
+
+= function# (get key dict) => (values value bool)
+　キーに紐付く値を取得する。
+　該当する値がある場合は(values 値 t)が、ない場合は(values nil nil)が返る。
+
+= function# (setf (get key dict) new-value) => new-value
+　キーに値を紐付ける。
+　既にキーがハッシュテーブル内に存在する場合は、その値が更新される。
+　存在しない場合は、キーと値が新たに追加される。
+
+= function# (remove key dict) => bool
+　キーに対応する要素をハッシュテーブルから削除する。
+　該当する要素が存在していた場合はtを、そうでない場合はnilを返す。
+
+= function# (map fn dict) => list
+　ハッシュテーブル内の各要素に関数fnを適用し、その結果をリストにして返す。
+
+= macro# (each (entry dict &optoinal result-form) &body body) => result-form
+　ハッシュテーブル内の各要素を走査する。
+　走査中の要素がentryに束縛された状態で、bodyが実行される。
+　全ての走査が終了した後、result-formが実行され、その結果が式の返り値となる。
