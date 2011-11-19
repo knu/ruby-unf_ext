@@ -31,8 +31,6 @@ namespace UNF {
       bool check_encoded_children(T& in) const {
         switch(type()) {
         case 0:
-          //          std::cout << "@ " << (int)in.peek() << std::endl;
-          // std::cout << "# " << (int)enc_chck(0) << ", " << (int)enc_chck(1) << std::endl;
           return ((enc_chck(0)==0 || (enc_chck(0) == in.read() && !in.eos())) &&
                   (enc_chck(1)==0 || (enc_chck(1) == in.read() && !in.eos())));
         case 1:

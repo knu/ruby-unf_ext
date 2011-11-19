@@ -27,7 +27,21 @@ namespace UNF {
 	  if(node.check_char() != in.peek())
             return default_value;
 	}
-      } 
+      }
+      
+      bool member(const char* key) const {
+        Node2 node = nodes2[root];
+
+	for(CharStream in(key);; in.read()) {
+          if(node.is_terminal())                     return true;
+          if(in.eos())                               return false;
+          if(node.check_encoded_children(in)==false) return false;
+          
+	  node = nodes2[node.jump(in.peek())];
+	  if(node.check_char() != in.peek())
+            return false;
+	}
+      }
 
     protected:
       const Node2* nodes2;
@@ -106,8 +120,7 @@ namespace UNF {
       NormalizationForm(const unsigned* nodes, unsigned root, const unsigned* vals,  const char* strs)
 	: Searcher(Node2::from_uint_array(nodes), root, vals, strs) {} 
 
-      // TODO: set的な検索は専用メソッドを設ける
-      bool quick_check(const char* key) const { return find_value(key,0xFFFFFFFF)==0xFFFFFFFF; }
+      bool quick_check(const char* key) const { return !member(key); }
 
       void decompose(RangeCharStream in, std::string& buffer) const {
       loop_head:
