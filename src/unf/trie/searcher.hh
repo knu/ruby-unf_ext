@@ -13,13 +13,19 @@ namespace UNF {
 	: nodes(nodes), root(root), value(value) {}
 
       unsigned find_value(const char* key, int default_value) const {
+        //        std::cout << "# " << key << " : " << root << std::endl;
 	unsigned node_index=root;
 	for(CharStream in(key);; in.read()) {
+          //  std::cout << "  - " << node_index << ":" << (int)in.peek() << std::endl;
 	  node_index = nodes[node_index].jump(in.peek());
+          //std::cout << "   - " << (int)nodes[node_index].check_char() << " : " << (int)in.peek() << std::endl;
 	  if(nodes[node_index].check_char()==in.peek()) {
-	    unsigned terminal_index = nodes[node_index].jump('\0');
-	    if(nodes[terminal_index].check_char()=='\0')
+	    unsigned terminal_index = nodes[node_index].jump('\1'); 
+            //std::cout << terminal_index << ":" << (int)nodes[terminal_index].check_char() << std::endl;
+	    if(nodes[terminal_index].check_char()=='\1') {
+              //   std::cout << " => " << nodes[terminal_index].value() << std::endl;
 	      return nodes[terminal_index].value();
+            }
 	  } else
 	    return default_value;
 	}
@@ -51,8 +57,8 @@ namespace UNF {
 	  node_index = nodes[node_index].jump(in.read());
 	  
 	  if(nodes[node_index].check_char()==in.prev()) {
-	    unsigned terminal_index = nodes[node_index].jump('\0');
-	    if(nodes[terminal_index].check_char()=='\0') {
+	    unsigned terminal_index = nodes[node_index].jump('\1');
+	    if(nodes[terminal_index].check_char()=='\1') {
 	      if((unicode_char_count++)==0)
 		sort_beg = beg;
 	      sort_end = in.cur()-str;
@@ -110,8 +116,8 @@ namespace UNF {
 	for(unsigned node_index=root;;) {
 	  node_index = nodes[node_index].jump(in.read());
 	  if(nodes[node_index].check_char()==in.prev()) {
-	    unsigned terminal_index = nodes[node_index].jump('\0');
-	    if(nodes[terminal_index].check_char()=='\0') {
+	    unsigned terminal_index = nodes[node_index].jump('\1');
+	    if(nodes[terminal_index].check_char()=='\1') {
               unsigned v = nodes[terminal_index].value();
 	      buffer.append(value+v_start(v), value+v_end(v));
 	      beg = in.cur();
@@ -155,8 +161,8 @@ namespace UNF {
 	  if(nodes[next_index].check_char()==in.prev()) {
 	    // succeeded
 	    node_index = next_index;
-	    unsigned terminal_index = nodes[node_index].jump('\0');
-	    if(nodes[terminal_index].check_char()=='\0') {
+	    unsigned terminal_index = nodes[node_index].jump('\1');
+	    if(nodes[terminal_index].check_char()=='\1') {
               unsigned v = nodes[terminal_index].value();
 	      composed_char = value+v_start(v);
               composed_char_end = value+v_end(v);

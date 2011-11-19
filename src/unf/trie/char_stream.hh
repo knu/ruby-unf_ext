@@ -10,9 +10,9 @@ namespace UNF {
     class CharStream {
     public:
       CharStream(const char* str) : cur_(str) {}
-      unsigned char read() { return eos() ? '\0' : *cur_++; }
+      unsigned char read() { return eos() ? '\1' : *cur_++; }
       unsigned char prev() const { return cur_[-1]; }
-      unsigned char peek() const { return *cur_; } 
+      unsigned char peek() const { return eos() ? '\1' : *cur_; } 
       const char*   cur() const { return cur_; }
       bool          eos() const { return *cur_ == '\0'; }
       void          setCur(const char* new_cur) { cur_ = new_cur; }
@@ -24,9 +24,9 @@ namespace UNF {
     class RangeCharStream {
     public:
       RangeCharStream(const char* beg, const char* end) : cur_(beg), end_(end) {}
-      unsigned char read() { return eos() ? '\0' : *cur_++; }
+      unsigned char read() { return eos() ? '\1' : *cur_++; }
       unsigned char prev() const { return cur_[-1]; }
-      unsigned char peek() const { return *cur_; } 
+      unsigned char peek() const { return eos() ? '\1' : *cur_; } 
       const char*   cur() const { return cur_; }
       const char*   end() const { return end_; }
       bool          eos() const { return cur_ == end_; }
@@ -60,8 +60,8 @@ namespace UNF {
       }
 
     protected:
-      unsigned char read1() { return eos1() ? '\0' : *cur1++; }
-      unsigned char read2() { return eos2() ? '\0' : *cur2++; }
+      unsigned char read1() { return eos1() ? '\1' : *cur1++; }
+      unsigned char read2() { return eos2() ? '\1' : *cur2++; }
       bool eos1() const { return *cur1=='\0'; }
       bool eos2() const { return *cur2=='\0'; }
       
