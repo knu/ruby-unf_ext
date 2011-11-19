@@ -9,11 +9,11 @@ namespace UNF {
   namespace Trie {
     class Searcher {
     public:
-      Searcher(const Node* nodes, const char* value=NULL)
-	: nodes(nodes), value(value) {}
+      Searcher(const Node* nodes, unsigned root, const char* value=NULL)
+	: nodes(nodes), root(root), value(value) {}
 
       unsigned find_value(const char* key, int default_value) const {
-	unsigned node_index=0;
+	unsigned node_index=root;
 	for(CharStream in(key);; in.read()) {
 	  node_index = nodes[node_index].jump(in.peek());
 	  if(nodes[node_index].check_char()==in.peek()) {
@@ -27,13 +27,14 @@ namespace UNF {
 
     protected:
       const Node* nodes;
+      const unsigned root;
       const char* value;
     }; 
     
     class CanonicalCombiningClass : private Searcher {
     public:
-      CanonicalCombiningClass(const unsigned* node_uints)
-	: Searcher(Node::from_uint_array(node_uints)) {}
+      CanonicalCombiningClass(const unsigned* node_uints, unsigned root)
+	: Searcher(Node::from_uint_array(node_uints), root) {}
       
       unsigned get_class(const char* str) const { return find_value(str,0); }
 
@@ -46,7 +47,7 @@ namespace UNF {
       loop_head:
 	unsigned beg = in.cur()-str;
 	
-	for(unsigned node_index=0;;){
+	for(unsigned node_index=root;;){
 	  node_index = nodes[node_index].jump(in.read());
 	  
 	  if(nodes[node_index].check_char()==in.prev()) {
@@ -97,8 +98,8 @@ namespace UNF {
       static unsigned v_end(unsigned v) { return v_start(v)+(v>>18); }
       
     public:
-      NormalizationForm(const unsigned* node_uints, const char* value=NULL)
-	: Searcher(Node::from_uint_array(node_uints), value) {} 
+      NormalizationForm(const unsigned* node_uints, unsigned root, const char* value=NULL)
+	: Searcher(Node::from_uint_array(node_uints), root, value) {} 
 
       bool quick_check(const char* key) const { return find_value(key,0xFFFFFFFF)==0xFFFFFFFF; }
 
@@ -106,7 +107,7 @@ namespace UNF {
       loop_head:
 	const char* beg = in.cur();
 
-	for(unsigned node_index=0;;) {
+	for(unsigned node_index=root;;) {
 	  node_index = nodes[node_index].jump(in.read());
 	  if(nodes[node_index].check_char()==in.prev()) {
 	    unsigned terminal_index = nodes[node_index].jump('\0');
@@ -135,13 +136,13 @@ namespace UNF {
 	const char* composed_char = NULL;
         const char* composed_char_end = NULL;
 	
-	unsigned node_index = 0;
-	unsigned retry_root_node = 0;
+	unsigned node_index = root;
+	unsigned retry_root_node = root;
 	unsigned char retry_root_class = 0;
 
 	for(bool first=true;;) {
 	  if(Util::is_utf8_char_start_byte(in.peek())) {
-	    if(node_index != 0)
+	    if(node_index != root)
 	      first=false;
 	    current_char_head = in.cur();
 
