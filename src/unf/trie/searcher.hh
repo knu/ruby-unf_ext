@@ -13,12 +13,14 @@ namespace UNF {
 	: nodes(nodes), root(root), value(value) {}
 
       unsigned find_value(const char* key, int default_value) const {
+        //std::cout << "# " << key << std::endl;
 	unsigned node_index=root;
 	for(CharStream in(key);; in.read()) {
 	  node_index = nodes[node_index].jump(in.peek());
 	  if(nodes[node_index].check_char()==in.peek()) {
 	    unsigned terminal_index = nodes[node_index].jump('\0'); 
 	    if(nodes[terminal_index].check_char()=='\0') {
+              //std::cout << " => " << nodes[terminal_index].value() << std::endl;
 	      return nodes[terminal_index].value();
             }
 	  } else
@@ -153,8 +155,8 @@ namespace UNF {
 	  }
 
 	retry:
-	  unsigned next_index = nodes[node_index].jump(in.read());
-	  if(nodes[next_index].check_char()==in.prev()) {
+	  unsigned next_index = nodes[node_index].jump(in.peek());
+	  if(nodes[next_index].check_char()==in.read()) {
 	    // succeeded
 	    node_index = next_index;
 	    unsigned terminal_index = nodes[node_index].jump('\0');

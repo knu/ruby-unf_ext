@@ -24,7 +24,8 @@ namespace UNF {
     private:
       unsigned base() const { return data & 0xFFFFFF; }
 
-    private:
+      //XXX:    private:
+    public:
       // TODO: bit-fieldを使ってみる
       unsigned data;
     };
