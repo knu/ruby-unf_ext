@@ -52,3 +52,9 @@ Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
+
+require 'rake/extensiontask'
+Rake::ExtensionTask.new('unf') do |ext|
+  ext.cross_compile = true
+  ext.cross_platform = 'x86-mingw32'
+end
