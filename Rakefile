@@ -22,7 +22,7 @@ Jeweler::Tasks.new do |gem|
   gem.email = "knu@idaemons.org"
   gem.authors = ["Takeru Ohta", "Akinori MUSHA"]
   # dependencies defined in Gemfile
-  gem.extensions << "ext/unf/extconf.rb"
+  gem.extensions << "ext/unf_ext/extconf.rb"
 end
 Jeweler::RubygemsDotOrgTasks.new
 
@@ -54,7 +54,7 @@ Rake::RDocTask.new do |rdoc|
 end
 
 require 'rake/extensiontask'
-Rake::ExtensionTask.new('unf') do |ext|
+Rake::ExtensionTask.new('unf_ext') do |ext|
   ext.cross_compile = true
   ext.cross_platform = 'x86-mingw32'
 end
