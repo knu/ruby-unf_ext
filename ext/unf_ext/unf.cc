@@ -1,9 +1,9 @@
+#include "unf/normalizer.hh"
+
 #include <ruby.h>
 #if defined(HAVE_RUBY_ENCODING_H)
 #include <ruby/encoding.h>
 #endif
-
-#include "unf/normalizer.hh"
 
 extern "C" {
   VALUE unf_allocate(VALUE klass);
