@@ -9,17 +9,18 @@ namespace UNF {
   namespace Trie {
     class Searcher {
     public:
-      Searcher(const Node* nodes, const char* value=NULL)
-	: nodes(nodes), value(value) {}
+      Searcher(const Node* nodes, unsigned root, const char* value=NULL)
+	: nodes(nodes), root(root), value(value) {}
 
       unsigned find_value(const char* key, int default_value) const {
-	unsigned node_index=0;
+	unsigned node_index=root;
 	for(CharStream in(key);; in.read()) {
 	  node_index = nodes[node_index].jump(in.peek());
 	  if(nodes[node_index].check_char()==in.peek()) {
-	    unsigned terminal_index = nodes[node_index].jump('\0');
-	    if(nodes[terminal_index].check_char()=='\0')
+	    unsigned terminal_index = nodes[node_index].jump('\0'); 
+	    if(nodes[terminal_index].check_char()=='\0') {
 	      return nodes[terminal_index].value();
+            }
 	  } else
 	    return default_value;
 	}
@@ -27,13 +28,14 @@ namespace UNF {
 
     protected:
       const Node* nodes;
+      const unsigned root;
       const char* value;
     }; 
     
     class CanonicalCombiningClass : private Searcher {
     public:
-      CanonicalCombiningClass(const unsigned* node_uints)
-	: Searcher(Node::from_uint_array(node_uints)) {}
+      CanonicalCombiningClass(const unsigned* node_uints, unsigned root)
+	: Searcher(Node::from_uint_array(node_uints), root) {}
       
       unsigned get_class(const char* str) const { return find_value(str,0); }
 
@@ -46,7 +48,7 @@ namespace UNF {
       loop_head:
 	unsigned beg = in.cur()-str;
 	
-	for(unsigned node_index=0;;){
+	for(unsigned node_index=root;;){
 	  node_index = nodes[node_index].jump(in.read());
 	  
 	  if(nodes[node_index].check_char()==in.prev()) {
@@ -93,8 +95,8 @@ namespace UNF {
 
     class NormalizationForm : private Searcher {
     public:
-      NormalizationForm(const unsigned* node_uints, const char* value=NULL)
-	: Searcher(Node::from_uint_array(node_uints), value) {} 
+      NormalizationForm(const unsigned* node_uints, unsigned root, const char* value=NULL)
+	: Searcher(Node::from_uint_array(node_uints), root, value) {} 
 
       bool quick_check(const char* key) const { return find_value(key,0xFFFFFFFF)==0xFFFFFFFF; }
 
@@ -102,12 +104,12 @@ namespace UNF {
       loop_head:
 	const char* beg = in.cur();
 
-	for(unsigned node_index=0;;) {
+	for(unsigned node_index=root;;) {
 	  node_index = nodes[node_index].jump(in.read());
 	  if(nodes[node_index].check_char()==in.prev()) {
 	    unsigned terminal_index = nodes[node_index].jump('\0');
 	    if(nodes[terminal_index].check_char()=='\0') {
-	      buffer.append(value+nodes[terminal_index].value());
+              word_append(buffer, value, nodes[terminal_index].value());
 	      beg = in.cur();
 	      break;
 	    }
@@ -127,15 +129,15 @@ namespace UNF {
 
 	const char* const beg = in.cur();
 	const char* current_char_head = in.cur();
-	const char* composed_char = NULL;
+	unsigned composed_char_info = 0;
 	
-	unsigned node_index = 0;
-	unsigned retry_root_node = 0;
+	unsigned node_index = root;
+	unsigned retry_root_node = root;
 	unsigned char retry_root_class = 0;
 
 	for(bool first=true;;) {
 	  if(Util::is_utf8_char_start_byte(in.peek())) {
-	    if(node_index != 0)
+	    if(node_index != root)
 	      first=false;
 	    current_char_head = in.cur();
 
@@ -144,13 +146,14 @@ namespace UNF {
 	  }
 
 	retry:
-	  unsigned next_index = nodes[node_index].jump(in.read());
-	  if(nodes[next_index].check_char()==in.prev()) {
+	  unsigned next_index = nodes[node_index].jump(in.peek());
+	  if(nodes[next_index].check_char()==in.read()) {
 	    // succeeded
 	    node_index = next_index;
 	    unsigned terminal_index = nodes[node_index].jump('\0');
 	    if(nodes[terminal_index].check_char()=='\0') {
-	      composed_char = value+nodes[terminal_index].value();
+	      composed_char_info = nodes[terminal_index].value();
+              
 	      in.mark_as_last_valid_point();
 	      if(in.eos() || retry_root_class > in.get_canonical_class())
 		break;
@@ -168,9 +171,9 @@ namespace UNF {
 	  }
 	}  
 	
-	if(composed_char) {
+	if(composed_char_info != 0) {
 	  // append composed unicode-character and skipped combining-characters
-	  buf.append(composed_char);
+	  word_append(buf, value, composed_char_info);
 	  in.append_skipped_chars_to_str(buf);
 	  in.reset_at_marked_point();
 	} else {
@@ -178,6 +181,11 @@ namespace UNF {
 	  in.setCur(Util::nearest_utf8_char_start_point(beg+1));
 	  in.append_read_char_to_str(buf, beg);
 	}
+      }
+      
+    private:
+      static void word_append(std::string& buffer, const char* base, unsigned pos_info) {
+        buffer.append(base+(pos_info&0x3FFFF), pos_info>>18);
       }
     };
   }
