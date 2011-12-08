@@ -5,14 +5,14 @@
 
 Gem::Specification.new do |s|
   s.name = %q{unf_ext}
-  s.version = "0.0.3"
+  s.version = "0.0.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Takeru Ohta}, %q{Akinori MUSHA}]
-  s.date = %q{2011-10-24}
+  s.date = %q{2011-12-08}
   s.description = %q{Unicode Normalization Form support library for CRuby}
   s.email = %q{knu@idaemons.org}
-  s.extensions = [%q{extconf.rb}]
+  s.extensions = [%q{ext/unf_ext/extconf.rb}]
   s.extra_rdoc_files = [
     "LICENSE.txt",
     "README.md"
@@ -24,17 +24,18 @@ Gem::Specification.new do |s|
     "README.md",
     "Rakefile",
     "VERSION",
-    "extconf.rb",
+    "ext/unf_ext/extconf.rb",
+    "ext/unf_ext/unf.cc",
+    "ext/unf_ext/unf/normalizer.hh",
+    "ext/unf_ext/unf/table.hh",
+    "ext/unf_ext/unf/trie/char_stream.hh",
+    "ext/unf_ext/unf/trie/node.hh",
+    "ext/unf_ext/unf/trie/searcher.hh",
+    "ext/unf_ext/unf/util.hh",
+    "lib/unf_ext.rb",
     "test/helper.rb",
     "test/normalization-test.txt",
     "test/test_unf_ext.rb",
-    "unf.cc",
-    "unf/normalizer.hh",
-    "unf/table.hh",
-    "unf/trie/char_stream.hh",
-    "unf/trie/node.hh",
-    "unf/trie/searcher.hh",
-    "unf/util.hh",
     "unf_ext.gemspec"
   ]
   s.homepage = %q{http://github.com/knu/ruby-unf_ext}
@@ -51,17 +52,20 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_development_dependency(%q<rcov>, [">= 0"])
+      s.add_development_dependency(%q<rake-compiler>, [">= 0.7.9"])
     else
       s.add_dependency(%q<shoulda>, [">= 0"])
       s.add_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_dependency(%q<rcov>, [">= 0"])
+      s.add_dependency(%q<rake-compiler>, [">= 0.7.9"])
     end
   else
     s.add_dependency(%q<shoulda>, [">= 0"])
     s.add_dependency(%q<bundler>, ["~> 1.0.0"])
     s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
     s.add_dependency(%q<rcov>, [">= 0"])
+    s.add_dependency(%q<rake-compiler>, [">= 0.7.9"])
   end
 end
 
