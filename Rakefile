@@ -22,9 +22,20 @@ Jeweler::Tasks.new do |gem|
   gem.email = "knu@idaemons.org"
   gem.authors = ["Takeru Ohta", "Akinori MUSHA"]
   # dependencies defined in Gemfile
-  gem.extensions << "ext/unf_ext/extconf.rb"
 end
 Jeweler::RubygemsDotOrgTasks.new
+
+def generated_gemspec
+  eval(File.read(Rake.application.jeweler.gemspec_helper.path))
+rescue
+  nil
+end
+
+require 'rake/extensiontask'
+Rake::ExtensionTask.new('unf_ext', generated_gemspec) do |ext|
+    ext.cross_compile = true
+    ext.cross_platform = 'x86-mingw32'
+end
 
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
@@ -51,10 +62,4 @@ Rake::RDocTask.new do |rdoc|
   rdoc.title = "unf_ext #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
-end
-
-require 'rake/extensiontask'
-Rake::ExtensionTask.new('unf_ext') do |ext|
-  ext.cross_compile = true
-  ext.cross_platform = 'x86-mingw32'
 end
