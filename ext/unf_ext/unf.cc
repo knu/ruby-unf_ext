@@ -8,7 +8,7 @@
 extern "C" {
   VALUE unf_allocate(VALUE klass);
   VALUE unf_initialize(VALUE self);
-  VALUE unf_delete(UNF::Normalizer* ptr);
+  void unf_delete(UNF::Normalizer* ptr);
   VALUE unf_normalize(VALUE self, VALUE source, VALUE normalization_form);
 
   ID FORM_NFD;
@@ -42,7 +42,7 @@ extern "C" {
     return self;
   }
 
-  VALUE unf_delete(UNF::Normalizer* ptr) {
+  void unf_delete(UNF::Normalizer* ptr) {
     ptr->~Normalizer();
     ruby_xfree(ptr);
   }
