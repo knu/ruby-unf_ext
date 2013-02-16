@@ -26,6 +26,12 @@ Requirement
 
 * C++ compiler and libstdc++
 
+* For the x86-mingw binary gem to work, the libstdc++ and libgcc
+  runtime files will be necessary, which can be downloaded them from
+  the following site:
+
+  http://sourceforge.net/projects/mingw/files/MinGW/Base/gcc/Version4/gcc-4.7.2-1/
+
 Installation
 ------------
 
