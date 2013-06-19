@@ -1,6 +1,6 @@
 require 'mkmf'
 have_library('stdc++')
-have_header('ruby/encoding.h')
+have_header('ruby/encoding.h') if RUBY_VERSION > '1.9.'
 create_makefile 'unf_ext'
 
 unless CONFIG['CXX']
