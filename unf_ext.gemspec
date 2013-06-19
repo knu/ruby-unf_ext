@@ -24,7 +24,7 @@ Gem::Specification.new do |gem|
     "README.md"
   ]
 
-  gem.add_development_dependency("shoulda", [">= 0"])
+  gem.add_development_dependency("shoulda", [RUBY_VERSION < "1.9" ? "< 3.5.0" : ">= 0"])
   gem.add_development_dependency("rake", [">= 0.9.2.2"])
   gem.add_development_dependency("rdoc", ["> 2.4.2"])
   gem.add_development_dependency("bundler", [">= 1.2"])
