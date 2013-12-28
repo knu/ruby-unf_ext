@@ -1,6 +1,7 @@
 require 'mkmf'
 have_library('stdc++')
-create_makefile 'unf_ext'
+have_func('signbit')
+create_makefile('unf_ext')
 
 unless CONFIG['CXX']
   case CONFIG['CC']
