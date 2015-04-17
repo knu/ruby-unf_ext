@@ -24,7 +24,6 @@ Gem::Specification.new do |gem|
     "README.md"
   ]
 
-  gem.add_development_dependency("shoulda", [RUBY_VERSION < "1.9" ? "< 3.5.0" : ">= 0"])
   if RUBY_VERSION < "1.9"
     # Cap dependency on activesupport with < 4.0 on behalf of
     # shoulda-matchers to satisfy bundler.
@@ -34,5 +33,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency("rdoc", ["> 2.4.2"])
   gem.add_development_dependency("bundler", [">= 1.2"])
   gem.add_development_dependency("rake-compiler", [">= 0.7.9"])
-
+  gem.add_development_dependency 'test-unit'
 end
