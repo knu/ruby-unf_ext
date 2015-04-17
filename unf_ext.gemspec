@@ -25,6 +25,7 @@ Gem::Specification.new do |gem|
   ]
 
   if RUBY_VERSION < "1.9"
+    gem.add_development_dependency('i18n', '< 0.7.0')
     # Cap dependency on activesupport with < 4.0 on behalf of
     # shoulda-matchers to satisfy bundler.
     gem.add_development_dependency("activesupport", ["< 4.0"])
