@@ -1,9 +1,9 @@
-## 0.0.7 (2015-04-17)
+## 0.0.7.1 (2015-04-18)
+
+- Windows fat binary gems no longer require libstd++ to
+  run, which are statically linked.
 
 - Add a fat binary gem for x64-mingw32 (64bit Windows).
-
-- Windows fat binary gems no longer require libgcc and libstd++ to
-  run, which are statically linked.
 
 - Windows fat binary gems now include binaries for Ruby up to 2.2.
 

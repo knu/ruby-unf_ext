@@ -1,5 +1,11 @@
 require 'mkmf'
-have_library('stdc++')
+
+if with_config('static-libstdc++')
+  $LDFLAGS << ' ' << `#{CONFIG['CC']} -print-file-name=libstdc++.a`.chomp
+else
+  have_library('stdc++')
+end
+
 create_makefile 'unf_ext'
 
 unless CONFIG['CXX']
