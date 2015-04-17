@@ -5,8 +5,8 @@ gemspec = Bundler::GemHelper.gemspec
 
 require 'rake/extensiontask'
 Rake::ExtensionTask.new('unf_ext', gemspec) do |ext|
-    ext.cross_compile = true
-    ext.cross_platform = 'x86-mingw32'
+  ext.cross_compile = true
+  ext.cross_platform = %w[x86-mingw32 x64-mingw32]
 end
 
 require 'rake/testtask'
