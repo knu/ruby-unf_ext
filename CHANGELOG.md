@@ -1,3 +1,7 @@
+## 0.0.7.2 (2016-02-01)
+
+- Version bump just for adding Windows binaries for Ruby 2.3.
+
 ## 0.0.7.1 (2015-04-18)
 
 - Windows fat binary gems no longer require libstd++ to
