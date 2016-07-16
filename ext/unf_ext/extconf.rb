@@ -6,7 +6,11 @@ else
   have_library('stdc++')
 end
 
-$CXXFLAGS += " -fsigned-char "
+if $CXXFLAGS == nil
+  $CXXFLAGS = " -fsigned-char "
+else
+  $CXXFLAGS += " -fsigned-char "
+end
 
 create_makefile 'unf_ext'
 
