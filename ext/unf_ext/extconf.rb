@@ -6,6 +6,8 @@ else
   have_library('stdc++')
 end
 
+$CXXFLAGS += " -fsigned-char "
+
 create_makefile 'unf_ext'
 
 unless CONFIG['CXX']
