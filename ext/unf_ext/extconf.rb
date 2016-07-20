@@ -6,7 +6,16 @@ else
   have_library('stdc++')
 end
 
-$CXXFLAGS << ' -fsigned-char'
+case RUBY_PLATFORM
+when /\Aarm/
+  # A quick fix for char being unsigned by default on ARM
+  if defined?($CXXFLAGS)
+    $CXXFLAGS << ' -fsigned-char'
+  else
+    # Ruby < 2.0
+    $CFLAGS << ' -fsigned-char'
+  end
+end
 
 create_makefile 'unf_ext'
 
