@@ -7,7 +7,7 @@ else
 end
 
 case RUBY_PLATFORM
-when /\Aarm/
+when /\A(arm|aarch64) /
   # A quick fix for char being unsigned by default on ARM
   if defined?($CXXFLAGS)
     $CXXFLAGS << ' -fsigned-char'
