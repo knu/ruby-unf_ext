@@ -1,3 +1,7 @@
+## 0.0.7.3 (2017-04-06)
+
+- Fix compile issues on ARM and GCC 6.
+
 ## 0.0.7.2 (2016-02-01)
 
 - Version bump just for adding Windows binaries for Ruby 2.3.
