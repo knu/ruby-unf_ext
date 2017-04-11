@@ -10,6 +10,17 @@ Rake::ExtensionTask.new('unf_ext', gemspec) do |ext|
   ext.cross_config_options << '--with-ldflags="-static-libgcc"' << '--with-static-libstdc++'
 end
 
+namespace :gem do
+  task :native do
+    require 'rake_compiler_dock'
+    RakeCompilerDock.sh "(bundle --local --quiet || bundle) && rake cross native gem"
+  end
+
+  task :all => [:build, :native]
+end
+
+task :gems => :'gem:all'
+
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
   test.libs << 'test'
