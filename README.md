@@ -38,8 +38,7 @@ Or:
 Development Resources
 ---------------------
 
-* http://sourceforge.jp/projects/unf/
-* http://sourceforge.jp/ticket/newticket.php?group_id=5256
+* https://github.com/sile/unf
 
     For issues regarding files under the directory `unf`, please
     contact this upstream.
@@ -51,8 +50,8 @@ Development Resources
 License
 -------
 
-Copyright (c) 2010 Takeru Ohta
-Copyright (c) 2011-2015 Akinori MUSHA
+Copyright (c) 2010-2017 Takeru Ohta
+Copyright (c) 2011-2017 Akinori MUSHA
 
 Licensed under the MIT license.
 See `LICENSE` for details.
