@@ -172,7 +172,7 @@
       (format out "};~%"))
 
     (with-open-file (in "/tmp/unf.str.dat" :element-type '(signed-byte 8))
-      (format out "~%const char STRINGS[]={")
+      (format out "~%const signed char STRINGS[]={")
       (loop FOR c = (read-byte in nil nil)
             WHILE c
             FOR i FROM 0
