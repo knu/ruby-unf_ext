@@ -1,7 +1,7 @@
 The MIT License
 
 Copyright (c) 2010 Takeru Ohta <phjgt308@gmail.com>
-Copyright (c) 2011-2015 Akinori MUSHA <knu@idaemons.org> (extended Ruby support)
+Copyright (c) 2011-2017 Akinori MUSHA <knu@idaemons.org> (extended Ruby support)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

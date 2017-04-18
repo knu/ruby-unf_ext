@@ -1,3 +1,7 @@
+## 0.0.7.4 (2017-04-19)
+
+- Fix build on ARM and GCC 6 again.
+
 ## 0.0.7.3 (2017-04-11)
 
 - Update the base Unicode version to 9.
