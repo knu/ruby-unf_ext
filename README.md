@@ -51,7 +51,7 @@ License
 -------
 
 Copyright (c) 2010-2017 Takeru Ohta
-Copyright (c) 2011-2017 Akinori MUSHA
+Copyright (c) 2011-2018 Akinori MUSHA
 
 Licensed under the MIT license.
 See `LICENSE` for details.
