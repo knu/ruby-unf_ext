@@ -4,6 +4,14 @@ if with_config('static-libstdc++')
   $LDFLAGS << ' ' << `#{CONFIG['CC']} -print-file-name=libstdc++.a`.chomp
 else
   have_library('stdc++')
+
+  if RbConfig::CONFIG['host_os'] =~ /aix/
+    # Compiler flags necessary on AIX.
+    # rubocop:disable Style/GlobalVars
+    $CFLAGS << ' ' << '-D_ALL_SOURCE=1'
+    $CPPFLAGS << ' ' << '-D_ALL_SOURCE=1'
+    $CXXFLAGS << ' ' << '-D_ALL_SOURCE=1'
+  end
 end
 
 create_makefile 'unf_ext'
