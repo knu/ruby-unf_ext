@@ -19,6 +19,6 @@ matrix:
     - rvm: rbx-18mode
     - rvm: rbx-19mode
 before_install:
-  - gem update --system --conservative
+  - gem update --system --conservative || gem install --conservative bundler -v '<2'
 before_script:
   - rake compile
