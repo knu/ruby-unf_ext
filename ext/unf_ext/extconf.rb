@@ -26,6 +26,10 @@ else
   end
 end
 
+if RbConfig::CONFIG['target_cpu'] == 'aarch64'
+  $CFLAGS << ' ' << '-fsigned-char'  
+end
+
 create_makefile 'unf_ext'
 
 unless CONFIG['CXX']
