@@ -12,19 +12,19 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-20.04, macos-11.0, windows-2019 ]
-        ruby: [ 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, head ]
+        ruby: [ 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 3.0, head ]
         include:
           - { os: windows-2019, ruby: mingw }
         exclude:
-          - { os: macos-11.0  , ruby: 2.2   }
-          - { os: macos-11.0  , ruby: 2.3   }
-          - { os: windows-2019, ruby: head  }
+          - { os: macos-11.0, ruby: 2.2 }
+          - { os: macos-11.0, ruby: 2.3 }
+          - { os: windows-2019, ruby: head }
 
     steps:
       - name: repo checkout
         uses: actions/checkout@v2
 
-      - name: load ruby, ragel
+      - name: load ruby cross-compilation toolkit
         uses: MSP-Greg/setup-ruby-pkgs@v1
         with:
           ruby-version: ${{ matrix.ruby }}
@@ -32,7 +32,7 @@ jobs:
 
       - name:  bundle install
         shell: pwsh
-        run:   |
+        run: |
           # update RubyGems in Ruby 2.2, bundle install
           if ('${{ matrix.ruby }}' -lt '2.3') {
             gem update --system 2.7.10 --no-document
@@ -42,8 +42,8 @@ jobs:
 
       - name: compile
         timeout-minutes: 5
-        run:  bundle exec rake compile
+        run: bundle exec rake compile
 
       - name: test
         timeout-minutes: 5
-        run:  bundle exec rake test
+        run: bundle exec rake test

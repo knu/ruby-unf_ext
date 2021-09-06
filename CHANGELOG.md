@@ -1,4 +1,10 @@
-## 0.0.7.7 (2019-03-19)
+## Unreleased
+
+- Include Windows binaries for Ruby 3.0.
+- Drop support for Ruby 2.1 and earlier.
+- Replace Travis CI with Github Actions.
+
+## 0.0.7.7 (2020-03-30)
 
 - Include Windows binaries for Ruby 2.7.
 
