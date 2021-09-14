@@ -22,7 +22,7 @@ namespace :gem do
   end
 end
 
-task :gems => :'gem:native'
+task :gems => %i[build gem:native]
 
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
