@@ -12,13 +12,17 @@ end
 namespace :gem do
   task :native do
     require 'rake_compiler_dock'
-    RakeCompilerDock.sh "(bundle --local --quiet || bundle) && rake cross native gem"
+    sh 'bundle package --all'
+    %w[
+      x64-mingw32
+      x86-mingw32
+    ].each do |plat|
+      RakeCompilerDock.sh "bundle --local && rake native:#{plat} gem", platform: plat
+    end
   end
-
-  task :all => [:build, :native]
 end
 
-task :gems => :'gem:all'
+task :gems => :'gem:native'
 
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
