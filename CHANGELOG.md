@@ -1,6 +1,10 @@
+## 0.0.8.2 (2022-04-13)
+
+- Add x64-mingw-ucrt native gem support for RubyInstaller 3.1.
+
 ## 0.0.8.1 (2022-03-13)
 
-- Include Windows binaries for Ruby 3.1.
+- Include Windows binaries for Ruby 3.1. (FAIL)
 
 ## 0.0.8 (2021-09-14)
 
