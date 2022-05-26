@@ -1,4 +1,4 @@
-## 0.0.8.2 (2022-04-13)
+## 0.0.8.2 (2022-05-26)
 
 - Add x64-mingw-ucrt native gem support for RubyInstaller 3.1.
 
