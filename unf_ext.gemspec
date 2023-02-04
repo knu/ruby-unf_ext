@@ -12,9 +12,11 @@ Gem::Specification.new do |gem|
   gem.homepage      = "https://github.com/knu/ruby-unf_ext"
   gem.licenses      = ["MIT"]
 
-  gem.files         = `git ls-files`.split($/)
-  gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
-  gem.test_files    = gem.files.grep(%r{^(test|spec|features)/}).grep(%r{/test_[^/]+\.rb$})
+  gem.files = Dir.chdir(__dir__) do
+    `git ls-files -z`.split("\x0").reject do |file|
+      file.start_with?(*%w[. Gemfile Rakefile test unf_ext.gemspec])
+    end
+  end
   gem.require_paths = ["lib"]
   gem.extensions    = ["ext/unf_ext/extconf.rb"]
 
