@@ -8,7 +8,7 @@
 extern "C" {
   VALUE unf_allocate(VALUE klass);
   VALUE unf_initialize(VALUE self);
-  void unf_delete(UNF::Normalizer* ptr);
+  void unf_delete(void* ptr);
   VALUE unf_normalize(VALUE self, VALUE source, VALUE normalization_form);
 
   ID FORM_NFD;
@@ -30,10 +30,17 @@ extern "C" {
     FORM_NFKC= rb_intern("nfkc");
   }
 
+  static const rb_data_type_t unf_normalizer_data_type = {
+    .wrap_struct_name = "UNF::Normalizer",
+    .function = {
+      .dfree = unf_delete
+    },
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED
+  };
 
   VALUE unf_allocate(VALUE klass) {
     UNF::Normalizer* ptr;
-    VALUE obj = Data_Make_Struct(klass, UNF::Normalizer, NULL, unf_delete, ptr);
+    VALUE obj = TypedData_Make_Struct(klass, UNF::Normalizer, &unf_normalizer_data_type, ptr);
     new ((void*)ptr) UNF::Normalizer;
     return obj;
   }
@@ -42,14 +49,15 @@ extern "C" {
     return self;
   }
 
-  void unf_delete(UNF::Normalizer* ptr) {
+  void unf_delete(void *data) {
+    UNF::Normalizer* ptr = (UNF::Normalizer*)data;
     ptr->~Normalizer();
     ruby_xfree(ptr);
   }
 
   VALUE unf_normalize(VALUE self, VALUE source, VALUE normalization_form) {
     UNF::Normalizer* ptr;
-    Data_Get_Struct(self, UNF::Normalizer, ptr);
+    TypedData_Get_Struct(self, UNF::Normalizer, &unf_normalizer_data_type, ptr);
 
     const char* src = StringValueCStr(source);
     const char* rlt;
