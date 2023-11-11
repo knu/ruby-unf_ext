@@ -1,3 +1,13 @@
+# Changelog
+
+## [0.0.9](https://github.com/knu/ruby-unf_ext/tree/v0.0.9) (2023-11-11)
+
+[Full Changelog](https://github.com/knu/ruby-unf_ext/compare/v0.0.8.2...v0.0.9)
+
+- Use the newer TypedData extension API [\#72](https://github.com/knu/ruby-unf_ext/pull/72) ([casperisfine](https://github.com/casperisfine))
+- Update Actions - updates OS's, add Ruby 3,2, etc [\#71](https://github.com/knu/ruby-unf_ext/pull/71) ([MSP-Greg](https://github.com/MSP-Greg))
+- Add cross compilation for Ruby 3.2 [\#69](https://github.com/knu/ruby-unf_ext/pull/69) ([johnnyshields](https://github.com/johnnyshields))
+
 ## 0.0.8.2 (2022-05-26)
 
 - Add x64-mingw-ucrt native gem support for RubyInstaller 3.1.
