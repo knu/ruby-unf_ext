@@ -6,6 +6,11 @@ else
   have_library('stdc++')
 
   case RbConfig::CONFIG['host_os']
+  when /mswin/
+    # Avoid `error C7555: use of designated initializers requires at least '/std:c++20'`
+    $CFLAGS << ' ' << '-std:c++20'
+    $CPPFLAGS << ' ' << '-std:c++20'
+    $CXXFLAGS << ' ' << '-std:c++20'
   when /solaris(!?2.11)/
     # Do a little trickery here to enable C++ standard on Solaris 11 if found.
     # This also forces 64bit compilation mode.
