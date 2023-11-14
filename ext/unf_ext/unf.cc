@@ -35,9 +35,7 @@ extern "C" {
     .function = {
       .dmark = NULL,
       .dfree = unf_delete,
-      .dsize = NULL,
-      .dcompact = NULL,
-      .reserved = {NULL}
+      .dsize = NULL
     },
     .parent = NULL,
     .data = NULL,
