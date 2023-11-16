@@ -33,8 +33,12 @@ extern "C" {
   static const rb_data_type_t unf_normalizer_data_type = {
     .wrap_struct_name = "UNF::Normalizer",
     .function = {
-      .dfree = unf_delete
+      .dmark = NULL,
+      .dfree = unf_delete,
+      .dsize = NULL
     },
+    .parent = NULL,
+    .data = NULL,
     .flags = RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED
   };
 
