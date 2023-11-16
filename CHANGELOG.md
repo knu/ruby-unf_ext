@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.9.1](https://github.com/knu/ruby-unf_ext/tree/v0.0.9.1) (2023-11-16)
+
+[Full Changelog](https://github.com/knu/ruby-unf_ext/compare/v0.0.9...v0.0.9.1)
+
+- Fix use of designated initializers. [\#75](https://github.com/knu/ruby-unf_ext/pull/75) ([igorpeshansky](https://github.com/igorpeshansky))
+
 ## [0.0.9](https://github.com/knu/ruby-unf_ext/tree/v0.0.9) (2023-11-11)
 
 [Full Changelog](https://github.com/knu/ruby-unf_ext/compare/v0.0.8.2...v0.0.9)
