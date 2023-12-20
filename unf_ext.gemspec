@@ -31,4 +31,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency("bundler", [">= 1.2"])
   gem.add_development_dependency("rake-compiler", [">= 1.2.1"])
   gem.add_development_dependency("rake-compiler-dock", [">= 1.3.0"])
+
+  gem.metadata["changelog_uri"] = gem.homepage + "/blob/master/CHANGELOG.md"
 end
